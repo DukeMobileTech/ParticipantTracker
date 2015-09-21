@@ -91,6 +91,8 @@ public class ParticipantType extends ReceiveModel {
         else
             return AppUtil.getContext().getResources().getString(labelId);
     }
+
+    public String getNonLocalizedLabel() { return mLabel; }
     
     public Long getRemoteId() {
         return mRemoteId;

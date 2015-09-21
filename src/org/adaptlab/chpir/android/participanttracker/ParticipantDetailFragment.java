@@ -70,7 +70,7 @@ public class ParticipantDetailFragment extends Fragment {
             Log.e(TAG, "Could not parse participant metadata for " + mParticipant.getId());
         }
         
-        sParticipantType = mParticipant.getParticipantType().getLabel();
+        sParticipantType = mParticipant.getParticipantType().getNonLocalizedLabel();
         
         getActivity().setTitle(mParticipant.getLabel());
     }
