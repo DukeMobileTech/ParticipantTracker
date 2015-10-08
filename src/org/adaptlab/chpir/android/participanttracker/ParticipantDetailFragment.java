@@ -24,10 +24,13 @@ import org.adaptlab.chpir.android.participanttracker.Receivers.InstrumentListRec
 import org.adaptlab.chpir.android.participanttracker.Receivers.ReceivedInstrumentDetails;
 import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantProperty;
+import org.adaptlab.chpir.android.participanttracker.models.Property;
 import org.adaptlab.chpir.android.participanttracker.models.Relationship;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ public class ParticipantDetailFragment extends Fragment {
     private final static int UPDATE_PARTICIPANT = 0;
     
     private Participant mParticipant;
+    private static  Participant sParticipant;
     private static String sParticipantMetadata;
     private static String sParticipantType;
     private LinearLayout mParticipantPropertiesContainer;
@@ -62,6 +66,7 @@ public class ParticipantDetailFragment extends Fragment {
             if (participantId == -1) return;
 
             mParticipant = Participant.findById(participantId);
+            sParticipant = Participant.findById(participantId);
         }
         
         try {
@@ -93,7 +98,7 @@ public class ParticipantDetailFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.participant_detail, menu);
-        super.onCreateOptionsMenu(menu,inflater);
+        super.onCreateOptionsMenu(menu, inflater);
     }
     
     @Override
@@ -137,17 +142,24 @@ public class ParticipantDetailFragment extends Fragment {
         
         final List<String> instrumentTitleList = new ArrayList<String>();
         final List<Long> instrumentIdList = new ArrayList<Long>();
+        int participantAge, startAge, endAge;
+        participantAge = startAge = endAge = 0;
+        participantAge = getParticipantAge(participantAge);
 
         for (ReceivedInstrumentDetails d : instrumentDetails) {
-            if (d.getParticipantType().equals("") || d.getParticipantType().equals(sParticipantType)) {
-                instrumentTitleList.add(d.getTitle());
-                instrumentIdList.add(d.getId());
-            }
+            if (!d.getParticipantStartAge().equals("")) startAge = Integer.parseInt(d.getParticipantStartAge());
+            if (!d.getParticipantEndAge().equals("")) endAge = Integer.parseInt(d.getParticipantEndAge());
+
+            if (!d.getParticipantType().equals("") && !d.getParticipantType().equals(sParticipantType)) continue;
+            if (!d.getParticipantStartAge().equals("") && !(startAge <= participantAge)) continue;
+            if (!d.getParticipantEndAge().equals("") && !(participantAge < endAge)) continue;
+            instrumentTitleList.add(d.getTitle());
+            instrumentIdList.add(d.getId());
         }
         
         builder.setSingleChoiceItems(instrumentTitleList.toArray(new String[instrumentTitleList.size()]), -1, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {             
+            public void onClick(DialogInterface dialog, int which) {
                 Intent i = new Intent();
                 i.setAction(InstrumentListReceiver.START_SURVEY);
                 i.putExtra(InstrumentListReceiver.START_SURVEY_INSTRUMENT_ID, instrumentIdList.get(which));
@@ -159,6 +171,40 @@ public class ParticipantDetailFragment extends Fragment {
         }); 
         
         builder.show();
+    }
+
+    private static int getParticipantAge(int participantAge) {
+        Property DofBProperty = getBirthDateProperty();
+        ParticipantProperty DofBPropertyValue;
+        if (DofBProperty != null && sParticipant.hasParticipantProperty(DofBProperty)) {
+            DofBPropertyValue = sParticipant.getParticipantProperty(DofBProperty);
+            if (DofBPropertyValue.getValue() != null && !DofBPropertyValue.getValue().equals("")) {
+                String[] dateList = DofBPropertyValue.getValue().split("-");
+                GregorianCalendar birthDate = new GregorianCalendar(Integer.parseInt(dateList[2]), Integer.parseInt(dateList[0]), Integer.parseInt(dateList[1]));
+                GregorianCalendar today = new GregorianCalendar();
+                participantAge = calculateAge(birthDate, today);
+            }
+        }
+        return participantAge;
+    }
+
+    private static Property getBirthDateProperty() {
+        for (Property property : Property.getAll()) {
+            if (property.getLabel().equals("Child DOB")) {
+                return property;
+            }
+        }
+        return null;
+    }
+
+    private static int calculateAge(GregorianCalendar birthDate, GregorianCalendar todayDate) {
+        int age = todayDate.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
+        if(todayDate.get(Calendar.MONTH) < birthDate.get(Calendar.MONTH) ||
+                (todayDate.get(Calendar.MONTH) == birthDate.get(Calendar.MONTH) &&
+                todayDate.get(Calendar.DATE) < birthDate.get(Calendar.DATE))) {
+            age --;
+        }
+        return age;
     }
     
     private void newSurvey() {

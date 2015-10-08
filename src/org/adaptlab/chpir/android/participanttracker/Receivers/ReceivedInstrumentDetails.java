@@ -8,6 +8,7 @@ public class ReceivedInstrumentDetails {
     private String mTitle;
     private long mId;
     private String mParticipantType;
+    private String mParticipantAge;
     
     public String getTitle() {
         return mTitle;
@@ -34,11 +35,35 @@ public class ReceivedInstrumentDetails {
             return "";
         }
     }
+
+    public String getParticipantStartAge() {
+        JSONObject json = null;
+        try {
+            json = new JSONObject(mParticipantAge);
+            return json.getString("start_age");
+        } catch (JSONException e) {
+            return "";
+        }
+    }
+
+    public String getParticipantEndAge() {
+        JSONObject json = null;
+        try {
+            json = new JSONObject(mParticipantAge);
+            return json.getString("end_age");
+        } catch (JSONException e) {
+            return "";
+        }
+    }
     
     public void setParticipantType(String participantType) {
         mParticipantType = participantType;
     }
-    
+
+    public void setParticipantAge(String age) {
+        mParticipantAge = age;
+    }
+
     public String toString() {
         return getTitle();
     }

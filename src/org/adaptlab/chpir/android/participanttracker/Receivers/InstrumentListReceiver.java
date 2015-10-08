@@ -19,19 +19,22 @@ public class InstrumentListReceiver extends BroadcastReceiver {
     public static final String START_SURVEY = "org.adaptlab.chpir.android.survey.start_survey";
     public static final String START_SURVEY_INSTRUMENT_ID = "org.adaptlab.chpir.android.survey.instrument_id";
     private static final String INSTRUMENT_PARTICIPANT_TYPE = "org.adaptlab.chpir.android.survey.instrument_participant_type";
+    private static final String INSTRUMENT_PARTICIPANT_AGE = "org.adaptlab.chpir.android.survey.instrument_participant_age";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "Received broadcast with list of available instruments");
         String[] instrumentTitleList = intent.getStringArrayExtra(INSTRUMENT_TITLE_LIST);
         long[] instrumentIdList = intent.getLongArrayExtra(INSTRUMENT_ID_LIST);
         String[] instrumentParticipantTypes = intent.getStringArrayExtra(INSTRUMENT_PARTICIPANT_TYPE);
+        String[] instrumentParticipantAges = intent.getStringArrayExtra(INSTRUMENT_PARTICIPANT_AGE);
+        Log.i(TAG, "Received broadcast with list of available instruments: " + instrumentTitleList.length);
         List<ReceivedInstrumentDetails> instrumentDetails = new ArrayList<ReceivedInstrumentDetails>();
         for (int i = 0; i < instrumentTitleList.length; i++) {
             ReceivedInstrumentDetails details = new ReceivedInstrumentDetails();
             details.setId(instrumentIdList[i]);
             details.setTitle(instrumentTitleList[i]);
             details.setParticipantType(instrumentParticipantTypes[i]);
+            details.setParticipantAge(instrumentParticipantAges[i]);
             instrumentDetails.add(details);
         }
         ParticipantDetailFragment.displayInstrumentPicker(instrumentDetails);
