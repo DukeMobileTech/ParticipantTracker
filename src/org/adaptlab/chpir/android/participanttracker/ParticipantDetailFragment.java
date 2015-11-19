@@ -1,5 +1,6 @@
 package org.adaptlab.chpir.android.participanttracker;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -26,10 +27,13 @@ import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantProperty;
 import org.adaptlab.chpir.android.participanttracker.models.Property;
 import org.adaptlab.chpir.android.participanttracker.models.Relationship;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.json.JSONException;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -81,15 +85,11 @@ public class ParticipantDetailFragment extends Fragment {
     }
     
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        View v = inflater.inflate(R.layout.fragment_participant_detail, parent,
-                false);       
-        
+        View v = inflater.inflate(R.layout.fragment_participant_detail, parent, false);
         mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id.participant_properties_container);
         refreshView();
-          
         return v;
     }
     
@@ -180,9 +180,12 @@ public class ParticipantDetailFragment extends Fragment {
             DofBPropertyValue = sParticipant.getParticipantProperty(DofBProperty);
             if (DofBPropertyValue.getValue() != null && !DofBPropertyValue.getValue().equals("")) {
                 String[] dateList = DofBPropertyValue.getValue().split("-");
-                GregorianCalendar birthDate = new GregorianCalendar(Integer.parseInt(dateList[2]), Integer.parseInt(dateList[0]), Integer.parseInt(dateList[1]));
-                GregorianCalendar today = new GregorianCalendar();
-                participantAge = calculateAge(birthDate, today);
+                if (dateList.length == 3) {
+                    GregorianCalendar birthDate = new GregorianCalendar(Integer.parseInt(dateList[2]), Integer.parseInt(dateList[0]), Integer.parseInt(dateList[1]));
+                    Period age = new Period(new DateTime(birthDate.getTime()).toInstant(), new DateTime().toInstant());
+                    participantAge = age.getYears();
+
+                }
             }
         }
         return participantAge;
@@ -195,16 +198,6 @@ public class ParticipantDetailFragment extends Fragment {
             }
         }
         return null;
-    }
-
-    private static int calculateAge(GregorianCalendar birthDate, GregorianCalendar todayDate) {
-        int age = todayDate.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
-        if(todayDate.get(Calendar.MONTH) < birthDate.get(Calendar.MONTH) ||
-                (todayDate.get(Calendar.MONTH) == birthDate.get(Calendar.MONTH) &&
-                todayDate.get(Calendar.DATE) < birthDate.get(Calendar.DATE))) {
-            age --;
-        }
-        return age;
     }
     
     private void newSurvey() {
@@ -247,6 +240,7 @@ public class ParticipantDetailFragment extends Fragment {
      * to their corresponding UI elements.
      * 
      */
+    @SuppressLint("LongLogTag")
     private void refreshView() {
         mParticipantPropertyLabels = new HashMap<ParticipantProperty, TextView>();
         mRelationshipButtons = new HashMap<Relationship, Button>();
@@ -254,10 +248,28 @@ public class ParticipantDetailFragment extends Fragment {
         mParticipantPropertiesContainer.removeAllViews();
         
         for (ParticipantProperty participantProperty : mParticipant.getParticipantProperties()) {
-            mParticipantPropertyLabels.put(
-                    participantProperty,
-                    addKeyValueLabel(participantProperty.getProperty().getLabel(), participantProperty.getValue())
-            );
+            String birthDay = participantProperty.getValue().replaceAll("\\s+", "");
+            Integer[] dateNums = getDateIntegers(birthDay);
+            if (participantProperty.getProperty().getTypeOf().equals(Property.PropertyType.DATE)
+                    && dateNums != null && dateNums.length == 3) {
+                GregorianCalendar dateOfBirth = new GregorianCalendar(dateNums[2], dateNums[0] - 1, dateNums[1]);
+                Date birthDate = dateOfBirth.getTime();
+                DateFormat df = DateFormat.getDateInstance();
+                mParticipantPropertyLabels.put(participantProperty,
+                        addKeyValueLabel(participantProperty.getProperty().getLabel(), df.format(birthDate)));
+
+                Period age = new Period(new DateTime(birthDate).toInstant(), new DateTime().toInstant());
+                int ageInMonths = age.getYears() * 12 + age.getMonths();
+                String ageString = age.getYears() + " " + getString(R.string.years) + " " + age.getMonths() + " "
+                        + getString(R.string.months) + " " + age.getDays() + " " + getString(R.string.days) + " "
+                        + getString(R.string.or) + " " + ageInMonths + " " + getString(R.string.months) + " "
+                        + age.getDays() + " " + getString(R.string.days);
+
+                addKeyValueLabel(getString(R.string.age), ageString);
+            } else {
+                mParticipantPropertyLabels.put(participantProperty,
+                        addKeyValueLabel(participantProperty.getProperty().getLabel(), participantProperty.getValue()));
+            }
         }
 
         for (final Relationship relationship : mParticipant.getRelationships()) {
@@ -277,5 +289,21 @@ public class ParticipantDetailFragment extends Fragment {
         }
         
         addKeyValueLabel("UUID", mParticipant.getUUID());
+    }
+
+    private Integer[] getDateIntegers(String date) {
+        Integer[] dateNumbers = new Integer[3];
+        int index = 0;
+        for (String s : date.split("-")) {
+            try {
+                dateNumbers[index] = Integer.parseInt(s);
+                index++;
+            } catch (NumberFormatException e) {
+                return null;
+            } catch (NullPointerException e) {
+                return null;
+            }
+        }
+        return dateNumbers;
     }
 }

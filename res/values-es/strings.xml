@@ -49,4 +49,9 @@
     <string name="child">Niño</string>
     <string name="caregiver">Educadora</string>
     <string name="center">Centro</string>
+    <string name="years">años</string>
+    <string name="months">meses</string>
+    <string name="days">días</string>
+    <string name="age">Edad Hoy</string>
+    <string name="or">Ó</string>
 </resources>

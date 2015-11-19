@@ -49,4 +49,9 @@
     <string name="child">Child</string>
     <string name="caregiver">Caregiver</string>
     <string name="center">Center</string>
+    <string name="years">years</string>
+    <string name="months">months</string>
+    <string name="days">days</string>
+    <string name="age">Age Today</string>
+    <string name="or">OR</string>
 </resources>
