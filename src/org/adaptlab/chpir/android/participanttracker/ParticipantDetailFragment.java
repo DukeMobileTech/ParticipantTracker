@@ -29,6 +29,7 @@ import org.adaptlab.chpir.android.participanttracker.models.Property;
 import org.adaptlab.chpir.android.participanttracker.models.Relationship;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 import org.json.JSONException;
 
 import java.text.DateFormat;
@@ -182,7 +183,7 @@ public class ParticipantDetailFragment extends Fragment {
                 String[] dateList = DofBPropertyValue.getValue().split("-");
                 if (dateList.length == 3) {
                     GregorianCalendar birthDate = new GregorianCalendar(Integer.parseInt(dateList[2]), Integer.parseInt(dateList[0]), Integer.parseInt(dateList[1]));
-                    Period age = new Period(new DateTime(birthDate.getTime()).toInstant(), new DateTime().toInstant());
+                    Period age = new Period(new DateTime(birthDate.getTime()).toInstant(), new DateTime().toInstant(), PeriodType.yearMonthDay());
                     participantAge = age.getYears();
 
                 }
@@ -258,7 +259,7 @@ public class ParticipantDetailFragment extends Fragment {
                 mParticipantPropertyLabels.put(participantProperty,
                         addKeyValueLabel(participantProperty.getProperty().getLabel(), df.format(birthDate)));
 
-                Period age = new Period(new DateTime(birthDate).toInstant(), new DateTime().toInstant());
+                Period age = new Period(new DateTime(birthDate).toInstant(), new DateTime().toInstant(), PeriodType.yearMonthDay());
                 int ageInMonths = age.getYears() * 12 + age.getMonths();
                 String ageString = age.getYears() + " " + getString(R.string.years) + " " + age.getMonths() + " "
                         + getString(R.string.months) + " " + age.getDays() + " " + getString(R.string.days) + " "
