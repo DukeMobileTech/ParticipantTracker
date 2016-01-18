@@ -152,8 +152,8 @@ public class ParticipantDetailFragment extends Fragment {
             if (!d.getParticipantEndAge().equals("")) endAge = Integer.parseInt(d.getParticipantEndAge());
 
             if (!d.getParticipantType().equals("") && !d.getParticipantType().equals(sParticipantType)) continue;
-            if (!d.getParticipantStartAge().equals("") && !(startAge <= participantAge)) continue;
-            if (!d.getParticipantEndAge().equals("") && !(participantAge < endAge)) continue;
+            if (!d.getParticipantStartAge().equals("") && !(startAge - 1 <= participantAge)) continue;
+            if (!d.getParticipantEndAge().equals("") && !(participantAge < endAge - 1)) continue;
             instrumentTitleList.add(d.getTitle());
             instrumentIdList.add(d.getId());
         }
