@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.adaptlab.chpir.android.participanttracker"
-    android:versionCode="27"
-    android:versionName="1.4.16" >
+    android:versionCode="28"
+    android:versionName="1.4.17" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -58,7 +58,7 @@
             android:screenOrientation="portrait"/>
         <meta-data android:name="AA_DB_NAME" android:value="Tracking.db" />
         <meta-data android:name="AA_DB_VERSION" android:value="8" />
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="@string/crashlytics_api_key"/>   
+        <meta-data android:name="io.fabric.ApiKey" android:value="${crashlyticsApiKey}" />
     </application>
 
 </manifest>

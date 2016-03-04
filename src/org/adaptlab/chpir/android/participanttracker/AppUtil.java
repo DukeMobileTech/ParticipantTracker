@@ -25,6 +25,8 @@ import org.adaptlab.chpir.android.vendor.BCrypt;
 
 import java.util.UUID;
 
+import io.fabric.sdk.android.Fabric;
+
 public class AppUtil {
     private final static boolean REQUIRE_SECURITY_CHECKS = !BuildConfig.DEBUG;
     private static final String TAG = "AppUtil";
@@ -51,7 +53,7 @@ public class AppUtil {
         }
 
         if (!BuildConfig.DEBUG) {
-            Crashlytics.start(context);
+            Fabric.with(mContext, new Crashlytics());
             Crashlytics.setUserIdentifier(AdminSettings.getInstance().getDeviceIdentifier());
             Crashlytics.setString("device label", AdminSettings.getInstance().getDeviceLabel());
         }

@@ -1,11 +1,5 @@
 package org.adaptlab.chpir.android.participanttracker;
 
-import java.util.List;
-import java.util.Locale;
-
-import org.adaptlab.chpir.android.participanttracker.models.Participant;
-import org.adaptlab.chpir.android.participanttracker.models.ParticipantType;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -38,6 +32,12 @@ import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.adaptlab.chpir.android.participanttracker.models.Participant;
+import org.adaptlab.chpir.android.participanttracker.models.ParticipantType;
+
+import java.util.List;
+import java.util.Locale;
 
 public class ParticipantListActivity extends FragmentActivity implements
         ActionBar.TabListener {

@@ -41,6 +41,8 @@ build/
 .gradle/
 .idea/
 gradle/
+build.gradle
+
 scripts/verhoeff_generator/*.csv
 ParticipantTracker.iml
 .DS_Store
