@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -143,17 +144,19 @@ public class ParticipantDetailFragment extends Fragment {
         
         final List<String> instrumentTitleList = new ArrayList<String>();
         final List<Long> instrumentIdList = new ArrayList<Long>();
-        int participantAge, startAge, endAge;
-        participantAge = startAge = endAge = 0;
+        int participantAge = 0;
         participantAge = getParticipantAge(participantAge);
 
         for (ReceivedInstrumentDetails d : instrumentDetails) {
-            if (!d.getParticipantStartAge().equals("")) startAge = Integer.parseInt(d.getParticipantStartAge());
-            if (!d.getParticipantEndAge().equals("")) endAge = Integer.parseInt(d.getParticipantEndAge());
-
+            String startAge = d.getParticipantStartAge();
+            String endAge = d.getParticipantEndAge();
+            if (!TextUtils.isEmpty(startAge) && !TextUtils.isEmpty(endAge)) {
+                if (!(participantAge >= Integer.parseInt(startAge) && participantAge < Integer.parseInt(endAge))) {
+                    if (BuildConfig.DEBUG) Log.i(TAG, d.getTitle()+ " Fails Age Rule");
+                    continue;
+                }
+            }
             if (!d.getParticipantType().equals("") && !d.getParticipantType().equals(sParticipantType)) continue;
-            if (!d.getParticipantStartAge().equals("") && !(startAge - 1 <= participantAge)) continue;
-            if (!d.getParticipantEndAge().equals("") && !(participantAge < endAge - 1)) continue;
             instrumentTitleList.add(d.getTitle());
             instrumentIdList.add(d.getId());
         }
