@@ -200,10 +200,12 @@ public class NewParticipantFragment extends Fragment {
 
                 if (!property.getValidationCallable().validate(propertyView.getText().toString())) {
                     propertyView.setError(getString(R.string.invalid_validator));
-                    propertyView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+                    propertyView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode
+                            .SRC_ATOP);
                 } else {
                     propertyView.setError(null);
-                    propertyView.getBackground().setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SRC_ATOP);
+                    propertyView.getBackground().setColorFilter(Color.TRANSPARENT, PorterDuff
+                            .Mode.SRC_ATOP);
                 }
             }
 
@@ -269,9 +271,16 @@ public class NewParticipantFragment extends Fragment {
     }
 
     public void displayRelationshipPicker(final RelationshipType relationshipType, final Button button) {
+        Property childIDProperty = Property.findByLabel("Child ID");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Choose " + relationshipType.getRelatedParticipantType().getLabel());
-        final List<Participant> relationshipParticipants = Participant.getAllByParticipantType(relationshipType.getRelatedParticipantType());
+        final List<Participant> relationshipParticipants;
+        if (mParticipant.getParticipantType().getLabel().equals("Child") && mParticipant.getParticipantProperty(childIDProperty).getValue() != null) {
+            relationshipParticipants = Participant.getAllCaregiversByCenter(relationshipType.getRelatedParticipantType(),
+                    mParticipant.getParticipantProperty(childIDProperty).getValue().substring(2,5));
+        } else {
+            relationshipParticipants = Participant.getAllByParticipantType(relationshipType.getRelatedParticipantType());
+        }
         CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants.size()];
 
         for (int i = 0; i < relationshipParticipants.size(); i++) {

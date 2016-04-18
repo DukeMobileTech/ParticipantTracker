@@ -104,6 +104,10 @@ public class Property extends ReceiveModel {
     public static List<Property> getAllByParticipantType(ParticipantType participantType) {
         return new Select().from(Property.class).where("ParticipantType = ?", participantType.getId()).execute();
     }
+
+    public static Property findByLabel(String label) {
+        return new Select().from(Property.class).where("Label = ?", label).executeSingle();
+    }
     
     /*
      * Getters / Setters

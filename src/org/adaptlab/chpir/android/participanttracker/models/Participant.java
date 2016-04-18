@@ -122,6 +122,18 @@ public class Participant extends SendReceiveModel {
                 .orderBy("Participant.Id DESC")
                 .execute();
     }
+
+    public static List<Participant> getAllCaregiversByCenter(ParticipantType participantType, String query) {
+        return new Select("Participant.*")
+                .distinct()
+                .from(Participant.class)
+                .innerJoin(ParticipantProperty.class)
+                .on("Participant.Id = ParticipantProperty.Participant AND Participant.ParticipantType = ? AND ParticipantProperty.Value LIKE ?",
+                        participantType.getId(),
+                        "__" + query + "%")
+                .orderBy("Participant.Id DESC")
+                .execute();
+    }
     
     public boolean hasParticipantProperty(Property property) {
         if (getId() == null) return false;
