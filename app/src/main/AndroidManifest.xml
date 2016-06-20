@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.adaptlab.chpir.android.participanttracker"
-    android:versionCode="32"
-    android:versionName="1.4.21" >
+          package="org.adaptlab.chpir.android.participanttracker" >
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="org.adaptlab.chpir.android.survey.LAUNCH_SURVEY" />
@@ -33,14 +28,14 @@
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
             <meta-data android:name="android.app.searchable"
-                   android:resource="@xml/searchable"/>
+                       android:resource="@xml/searchable"/>
             <meta-data
-                   android:name="android.app.default_searchable"
-                   android:value=".ParticipantListActivity" />
+                android:name="android.app.default_searchable"
+                android:value=".ParticipantListActivity" />
         </activity>
         <activity android:name=".AdminActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait" />
         <service android:name="org.adaptlab.chpir.android.activerecordcloudsync.PollService" />
         <receiver android:name="org.adaptlab.chpir.android.participanttracker.Receivers.InstrumentListReceiver">
             <intent-filter>
@@ -48,14 +43,14 @@
             </intent-filter>
         </receiver>
         <activity android:name=".ParticipantDetailActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
         <activity android:name=".NewParticipantActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity android:name=".LoginActivity"  
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait" />
+        <activity android:name=".LoginActivity"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"/>
         <meta-data android:name="AA_DB_NAME" android:value="Tracking.db" />
         <meta-data android:name="AA_DB_VERSION" android:value="8" />
         <meta-data android:name="io.fabric.ApiKey" android:value="${crashlyticsApiKey}" />
