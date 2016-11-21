@@ -2,6 +2,8 @@ package org.adaptlab.chpir.android.activerecordcloudsync;
 
 import android.util.Log;
 
+import com.activeandroid.ActiveAndroid;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -14,7 +16,7 @@ import java.net.URL;
 
 public class HttpFetchr {
     private static final String TAG = "HttpFetchr";
-    Class<? extends ReceiveModel> mReceiveTableClass;
+    private Class<? extends ReceiveModel> mReceiveTableClass;
     private String mRemoteTableName;
 
     public HttpFetchr() {
@@ -26,17 +28,12 @@ public class HttpFetchr {
         mRemoteTableName = remoteTableName;
     }
 
-    public String getUrl(String urlSpec) throws IOException {
-        return new String(getUrlBytes(urlSpec));
-    }
-
     public void fetch() {
         if (ActiveRecordCloudSync.getEndPoint() == null) {
             Log.i(TAG, "ActiveRecordCloudSync end point is not set!");
             return;
         }
 
-        ActiveRecordCloudSync.setFetchCount(ActiveRecordCloudSync.getFetchCount() + 1);
         try {
             String url = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName
                     + ActiveRecordCloudSync.getParams();
@@ -46,11 +43,16 @@ public class HttpFetchr {
             JSONArray jsonArray = new JSONArray(jsonString);
             Log.i(TAG, "Received json result: " + jsonArray);
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                ReceiveModel tableInstance = mReceiveTableClass.newInstance();
-                tableInstance.createObjectFromJSON(jsonArray.getJSONObject(i));
+            ActiveAndroid.beginTransaction();
+            try {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    ReceiveModel tableInstance = mReceiveTableClass.newInstance();
+                    tableInstance.createObjectFromJSON(jsonArray.getJSONObject(i));
+                }
+                ActiveAndroid.setTransactionSuccessful();
+            } finally {
+                ActiveAndroid.endTransaction();
             }
-            ActiveRecordCloudSync.recordLastSyncTime();
 
         } catch (ConnectException cre) {
             Log.e(TAG, "Connection was refused", cre);
@@ -65,6 +67,10 @@ public class HttpFetchr {
         } catch (NullPointerException npe) {
             Log.e(TAG, "Url is null", npe);
         }
+    }
+
+    public String getUrl(String urlSpec) throws IOException {
+        return new String(getUrlBytes(urlSpec));
     }
 
     private byte[] getUrlBytes(String urlSpec) throws IOException {

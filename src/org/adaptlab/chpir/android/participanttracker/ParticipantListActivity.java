@@ -41,9 +41,13 @@ import java.util.Locale;
 
 public class ParticipantListActivity extends FragmentActivity implements
         ActionBar.TabListener {
-    private static final String TAG = "ParticipantListActivity";
     public final static int DATA_CHANGED = 0;
-
+    private static final String TAG = "ParticipantListActivity";
+    /**
+     * The {@link ViewPager} that will host the section contents.
+     */
+    ViewPager mViewPager;
+    ActionBar mActionBar;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -54,12 +58,66 @@ public class ParticipantListActivity extends FragmentActivity implements
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    ViewPager mViewPager;
-    
-   ActionBar mActionBar;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.participant_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                displayPassWordPrompt();
+                return true;
+            case R.id.menu_item_refresh:
+                authenticateUser();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void displayPassWordPrompt() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.password_title)
+                .setMessage(R.string.password_message)
+                .setView(input)
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int button) {
+                        if (AppUtil.checkAdminPassword(input.getText().toString())) {
+                            Intent i = new Intent(ParticipantListActivity.this, AdminActivity
+                                    .class);
+                            startActivity(i);
+                        } else {
+                            Toast.makeText(ParticipantListActivity.this, R.string
+                                    .incorrect_password, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int button) {
+            }
+        }).show();
+    }
+
+    private void authenticateUser() {
+        Intent i = new Intent(ParticipantListActivity.this, LoginActivity.class);
+        startActivityForResult(i, DATA_CHANGED);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == DATA_CHANGED) {
+            if (resultCode == RESULT_OK) {
+                mSectionsPagerAdapter.notifyDataSetChanged();
+                refreshSectionTabs();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +129,7 @@ public class ParticipantListActivity extends FragmentActivity implements
         // Set up the action bar.
         mActionBar = getActionBar();
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -99,81 +157,23 @@ public class ParticipantListActivity extends FragmentActivity implements
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
             mActionBar.addTab(mActionBar.newTab()
-                    .setText(mSectionsPagerAdapter.getPageTitle(i))     
+                    .setText(mSectionsPagerAdapter.getPageTitle(i))
                     .setTabListener(this));
         }
     }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.participant_list, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {	
-    	case R.id.action_settings:
-    		displayPassWordPrompt();
-    		return true;
-    	case R.id.menu_item_refresh:
-    		authenticateUser();
-    		return true;
-    	default:
-    		return super.onOptionsItemSelected(item);
-    	}
-    }
 
-    private void authenticateUser() {
-    	Intent i = new Intent(ParticipantListActivity.this, LoginActivity.class);
-        startActivityForResult(i, DATA_CHANGED);		
-	}
-    
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == DATA_CHANGED) {
-            if (resultCode == RESULT_OK) {
-                mSectionsPagerAdapter.notifyDataSetChanged();
-                refreshSectionTabs();
-            }
-        }
-    }
-    
     private void refreshSectionTabs() {
-    	mActionBar.removeAllTabs();
-    	for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+        mActionBar.removeAllTabs();
+        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             mActionBar.addTab(mActionBar.newTab()
-                    .setText(mSectionsPagerAdapter.getPageTitle(i))     
+                    .setText(mSectionsPagerAdapter.getPageTitle(i))
                     .setTabListener(this));
         }
     }
 
-	private void displayPassWordPrompt() {
-    	final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        new AlertDialog.Builder(this)
-        .setTitle(R.string.password_title)
-        .setMessage(R.string.password_message)
-        .setView(input)
-        .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() { 
-            public void onClick(DialogInterface dialog, int button) {
-                if (AppUtil.checkAdminPassword(input.getText().toString())) {
-                    Intent i = new Intent(ParticipantListActivity.this, AdminActivity.class);
-                    startActivity(i);
-                } else {
-                    Toast.makeText(ParticipantListActivity.this, R.string.incorrect_password, Toast.LENGTH_LONG).show();
-                }
-            }
-        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int button) { }
-        }).show();
-    }
-
-	@Override
+    @Override
     public void onTabSelected(ActionBar.Tab tab,
-            FragmentTransaction fragmentTransaction) {
+                              FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
         mViewPager.setCurrentItem(tab.getPosition());
@@ -181,12 +181,160 @@ public class ParticipantListActivity extends FragmentActivity implements
 
     @Override
     public void onTabUnselected(ActionBar.Tab tab,
-            FragmentTransaction fragmentTransaction) {
+                                FragmentTransaction fragmentTransaction) {
     }
 
     @Override
     public void onTabReselected(ActionBar.Tab tab,
-            FragmentTransaction fragmentTransaction) {
+                                FragmentTransaction fragmentTransaction) {
+    }
+
+    public static class ParticipantListFragment extends ListFragment {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        public static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String TAG = "ParticipantListFragment";
+        private static final int CREATE_NEW_PARTICIPANT = 0;
+        private Button mNewParticipantButton;
+        private String currentQuery = null;
+
+        final private OnQueryTextListener queryListener = new OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                setParticipantListAdapter(currentQuery);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (TextUtils.isEmpty(newText)) {
+                    currentQuery = null;
+                    setParticipantListAdapter(currentQuery);
+                } else {
+                    currentQuery = newText;
+                }
+
+                return false;
+            }
+        };
+
+        public ParticipantListFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
+                savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_participant_list_dummy, container,
+                    false);
+
+            mNewParticipantButton = (Button) rootView.findViewById(R.id.new_participant_button);
+            mNewParticipantButton.setText(getString(R.string.new_participant_prefix) +
+                    getParticipantType().getLabel());
+            mNewParticipantButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent i = new Intent(getActivity(), NewParticipantActivity.class);
+                    i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID,
+                            getParticipantType().getId());
+                    startActivityForResult(i, CREATE_NEW_PARTICIPANT);
+                }
+            });
+
+            return rootView;
+        }
+
+        @Override
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            Participant participant = ((ParticipantAdapter) getListAdapter()).getItem(position);
+            Intent i = new Intent(getActivity(), ParticipantDetailActivity.class);
+            i.putExtra(ParticipantDetailFragment.EXTRA_PARTICIPANT_ID, participant.getId());
+            startActivity(i);
+        }
+
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+            if (requestCode == CREATE_NEW_PARTICIPANT) {
+                if (resultCode == RESULT_OK) {
+                    setParticipantListAdapter(currentQuery);
+                }
+            }
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            setHasOptionsMenu(true);
+            setParticipantListAdapter(currentQuery);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            setParticipantListAdapter(currentQuery);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                SearchManager searchManager = (SearchManager) getActivity().getSystemService
+                        (Context.SEARCH_SERVICE);
+                SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                        .getActionView();
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity()
+                        .getComponentName()));
+                searchView.setIconifiedByDefault(true);
+                searchView.setOnQueryTextListener(queryListener);
+            }
+        }
+
+        private void setParticipantListAdapter(String query) {
+            List<Participant> participants;
+            if (query != null) {
+                participants = Participant.getAllByParticipantType(getParticipantType(), query);
+            } else {
+                participants = Participant.getAllByParticipantType(getParticipantType());
+            }
+
+            setListAdapter(new ParticipantAdapter(getActivity(), participants));
+        }
+
+        private ParticipantType getParticipantType() {
+            int participantTypeId = getArguments().getInt(ARG_SECTION_NUMBER, 0);
+            ParticipantType participantType = ParticipantType.getAll().get(participantTypeId);
+            return participantType;
+        }
+    }
+
+    private static class ParticipantAdapter extends ArrayAdapter<Participant> {
+        private Context mContext;
+
+        public ParticipantAdapter(Context context, List<Participant> participants) {
+            super(context, 0, participants);
+            mContext = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = ((Activity) mContext).getLayoutInflater().inflate(
+                        R.layout.list_item_participant, null);
+            }
+
+            Participant participant = getItem(position);
+
+            TextView titleTextView = (TextView) convertView.findViewById(R.id
+                    .participant_list_item_titleTextView);
+            titleTextView.setText(participant.getLabel());
+
+            return convertView;
+        }
     }
 
     /**
@@ -220,147 +368,6 @@ public class ParticipantListActivity extends FragmentActivity implements
                 return ParticipantType.getAll().get(position).getLabel();
             }
             return null;
-        }
-    }
-
-    public static class ParticipantListFragment extends ListFragment {
-        private static final String TAG = "ParticipantListFragment";
-        private static final int CREATE_NEW_PARTICIPANT = 0;
-        
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        public static final String ARG_SECTION_NUMBER = "section_number";
-        private Button mNewParticipantButton;
-        private String currentQuery = null;
-
-        final private OnQueryTextListener queryListener = new OnQueryTextListener() {       
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (TextUtils.isEmpty(newText)) {              
-                    currentQuery = null;
-                    setParticipantListAdapter(currentQuery);
-                } else {
-                    currentQuery = newText;
-                }
-                
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                setParticipantListAdapter(currentQuery);
-                return false;
-            }
-        };
-        
-        public ParticipantListFragment() {          
-        }
-        
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-        }
-        
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            setHasOptionsMenu(true);
-            setParticipantListAdapter(currentQuery);
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_participant_list_dummy, container, false);
-            
-            mNewParticipantButton = (Button) rootView.findViewById(R.id.new_participant_button);            
-            mNewParticipantButton.setText(getString(R.string.new_participant_prefix) + getParticipantType().getLabel());
-            mNewParticipantButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent i = new Intent(getActivity(), NewParticipantActivity.class);
-                    i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID, getParticipantType().getId());
-                    startActivityForResult(i, CREATE_NEW_PARTICIPANT);
-                }
-            });
-
-            return rootView;
-        }
-        
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Participant participant = ((ParticipantAdapter) getListAdapter()).getItem(position);
-            Intent i = new Intent(getActivity(), ParticipantDetailActivity.class);
-            i.putExtra(ParticipantDetailFragment.EXTRA_PARTICIPANT_ID, participant.getId());
-            startActivity(i);
-        }   
-        
-        @Override 
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-                searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
-                searchView.setIconifiedByDefault(true);
-                searchView.setOnQueryTextListener(queryListener);
-            }
-        }
-        
-        @Override
-        public void onResume() {
-            super.onResume();
-            setParticipantListAdapter(currentQuery);
-        }
-        
-        private ParticipantType getParticipantType() {
-            int participantTypeId = getArguments().getInt(ARG_SECTION_NUMBER, 0);
-            ParticipantType participantType = ParticipantType.getAll().get(participantTypeId);
-            return participantType;
-        }
-        
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-
-            if (requestCode == CREATE_NEW_PARTICIPANT) {
-                if (resultCode == RESULT_OK) {
-                    setParticipantListAdapter(currentQuery);
-                }
-            }
-        }
-        
-        private void setParticipantListAdapter(String query) {
-            List<Participant> participants;
-            if (query != null) {
-                participants = Participant.getAllByParticipantType(getParticipantType(), query);   
-            } else {
-                participants = Participant.getAllByParticipantType(getParticipantType());
-            }
-            
-            setListAdapter(new ParticipantAdapter(getActivity(), participants));
-        }
-    }
-    
-    private static class ParticipantAdapter extends ArrayAdapter<Participant> {
-        private Context mContext;
-        
-        public ParticipantAdapter(Context context, List<Participant> participants) {
-            super(context, 0, participants);
-            mContext = context;
-        }
-               
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = ((Activity) mContext).getLayoutInflater().inflate(
-                        R.layout.list_item_participant, null);
-            }
-            
-            Participant participant = getItem(position);
-            
-            TextView titleTextView = (TextView) convertView.findViewById(R.id.participant_list_item_titleTextView);           
-            titleTextView.setText(participant.getLabel());
-            
-            return convertView;
         }
     }
 }

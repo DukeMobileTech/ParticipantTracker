@@ -7,6 +7,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
 import org.adaptlab.chpir.android.activerecordcloudsync.SendReceiveModel;
+import org.adaptlab.chpir.android.participanttracker.BuildConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,12 +17,14 @@ import java.util.UUID;
 @Table(name = "ParticipantProperty")
 public class ParticipantProperty extends SendReceiveModel {
     private static final String TAG = "ParticipantProperty";
-    
+
     @Column(name = "SentToRemote")
     private boolean mSent;
-    @Column(name = "Participant", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
+    @Column(name = "Participant", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column
+            .ForeignKeyAction.CASCADE)
     private Participant mParticipant;
-    @Column(name = "Property", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
+    @Column(name = "Property", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column
+            .ForeignKeyAction.CASCADE)
     private Property mProperty;
     @Column(name = "Value")
     private String mValue;
@@ -29,13 +32,15 @@ public class ParticipantProperty extends SendReceiveModel {
     private String mUUID;
     @Column(name = "RemoteId", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     private Long mRemoteId;
+    @Column(name = "Changed")
+    private boolean mChanged;
 
     public ParticipantProperty() {
         super();
         mSent = false;
         mUUID = UUID.randomUUID().toString();
     }
-    
+
     public ParticipantProperty(Participant participant, Property property, String value) {
         super();
         mSent = false;
@@ -44,42 +49,35 @@ public class ParticipantProperty extends SendReceiveModel {
         mValue = value;
         mUUID = UUID.randomUUID().toString();
     }
-    
-    @Override
-    public boolean isPersistent() {
-        return true;
+
+    public static ParticipantProperty findByRemoteId(Long id) {
+        return new Select().from(ParticipantProperty.class).where("RemoteId = ?", id)
+                .executeSingle();
     }
-    
-    private void setParticipant(Participant participant) {
-    	mParticipant = participant;
+
+    public static List<ParticipantProperty> getAllByParticipant(Participant participant) {
+        return new Select().from(ParticipantProperty.class).where("Participant = ?", participant
+                .getId()).execute();
     }
 
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-        
+
         try {
             JSONObject jsonObject = new JSONObject();
             if (getParticipant() != null)
-            	jsonObject.put("participant_uuid", getParticipant().getUUID());
+                jsonObject.put("participant_uuid", getParticipant().getUUID());
             if (getProperty() != null)
-            	jsonObject.put("property_id", getProperty().getRemoteId());
+                jsonObject.put("property_id", getProperty().getRemoteId());
             jsonObject.put("value", getValue());
             jsonObject.put("uuid", getUUID());
 
             json.put("participant_property", jsonObject);
         } catch (JSONException je) {
-            Log.e(TAG, "JSON exception", je);
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
         return json;
-    }
-    
-    public String getUUID() {
-        return mUUID;
-    }
-    
-    public void setUUID(String uuid) {
-    	mUUID = uuid;
     }
 
     @Override
@@ -97,81 +95,101 @@ public class ParticipantProperty extends SendReceiveModel {
         mSent = true;
         save();
     }
-    
+
+    @Override
+    public boolean isPersistent() {
+        return true;
+    }
+
+    @Override
+    public Long getRemoteId() {
+        return mRemoteId;
+    }
+
+    public void setRemoteId(Long id) {
+        mRemoteId = id;
+    }
+
     public Participant getParticipant() {
         return mParticipant;
     }
-    
+
+    private void setParticipant(Participant participant) {
+        mParticipant = participant;
+    }
+
     public Property getProperty() {
         return mProperty;
     }
-    
+
     private void setProperty(Property property) {
-    	mProperty = property;
+        mProperty = property;
     }
-    
+
     public String getValue() {
         return mValue;
     }
-    
-    public void setValue(String value) {
-    	mValue = value;
-    }
-    
-    public void setRemoteId(Long id) {
-    	mRemoteId = id;
-    }
-    
-    @Override
-    public Long getRemoteId() {
-    	return mRemoteId;
-    }
-    
-    public static ParticipantProperty findByRemoteId(Long id) {
-    	return new Select().from(ParticipantProperty.class).where("RemoteId = ?", id).executeSingle();
-    }
-    
-    public static ParticipantProperty findByUUID(String uuid) {
-    	return new Select().from(ParticipantProperty.class).where("UUID = ?", uuid).executeSingle();
-    }
-    
-    public static List<ParticipantProperty> getAllByParticipant(Participant participant) {
-    	return new Select().from(ParticipantProperty.class).where("Participant = ?", participant.getId()).execute();
+
+    public String getUUID() {
+        return mUUID;
     }
 
-	@Override
-	public void createObjectFromJSON(JSONObject jsonObject) {
-		try {
-			String uuid = jsonObject.getString("uuid");
-			ParticipantProperty participantProperty = ParticipantProperty.findByUUID(uuid);
-			if (participantProperty == null) {
-				participantProperty = this;
-			}
-			participantProperty.setUUID(uuid);
-			Long remoteId = jsonObject.getLong("id");
-			participantProperty.setRemoteId(remoteId);
-			Participant participant = Participant.findByUUID(jsonObject.getString("participant_uuid"));
-			if (participant != null) {
-				participantProperty.setParticipant(participant);
-			}
-			
-			Property property = Property.findByRemoteId(jsonObject.getLong("property_id"));
-			
-			if (property != null) {
-				participantProperty.setProperty(property);
-			}
-			participantProperty.setValue(jsonObject.getString("value"));
-			if (jsonObject.isNull("deleted_at")) {
-				participantProperty.save();
-			} else {
-				ParticipantProperty pp = ParticipantProperty.findByUUID(uuid);
-				if (pp != null) {
-					pp.delete();
-				}
-			}
-			
-		} catch(JSONException je) {
-			Log.e(TAG, "Error parsing object json", je);
-		}
-	}
+    public void setUUID(String uuid) {
+        mUUID = uuid;
+    }
+
+    public void setValue(String value) {
+        mValue = value;
+    }
+
+    @Override
+    public void createObjectFromJSON(JSONObject jsonObject) {
+        try {
+            String uuid = jsonObject.getString("uuid");
+            ParticipantProperty participantProperty = ParticipantProperty.findByUUID(uuid);
+            if (participantProperty == null) {
+                participantProperty = this;
+            }
+            participantProperty.setUUID(uuid);
+            Long remoteId = jsonObject.getLong("id");
+            participantProperty.setRemoteId(remoteId);
+            Participant participant = Participant.findByUUID(jsonObject.getString
+                    ("participant_uuid"));
+            if (participant != null) {
+                participantProperty.setParticipant(participant);
+            }
+
+            Property property = Property.findByRemoteId(jsonObject.getLong("property_id"));
+
+            if (property != null) {
+                participantProperty.setProperty(property);
+            }
+            participantProperty.setValue(jsonObject.getString("value"));
+            if (jsonObject.isNull("deleted_at")) {
+                participantProperty.setChanged(false);
+                participantProperty.save();
+            } else {
+                ParticipantProperty pp = ParticipantProperty.findByUUID(uuid);
+                if (pp != null) {
+                    pp.delete();
+                }
+            }
+
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "Error parsing object json", je);
+        }
+    }
+
+    @Override
+    public boolean isChanged() {
+        return mChanged;
+    }
+
+    public void setChanged(boolean changed) {
+        mChanged = changed;
+    }
+
+    public static ParticipantProperty findByUUID(String uuid) {
+        return new Select().from(ParticipantProperty.class).where("UUID = ?", uuid).executeSingle();
+    }
 }

@@ -7,6 +7,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
 import org.adaptlab.chpir.android.activerecordcloudsync.SendReceiveModel;
+import org.adaptlab.chpir.android.participanttracker.BuildConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,39 +17,51 @@ import java.util.UUID;
 @Table(name = "Relationship")
 public class Relationship extends SendReceiveModel {
     private static final String TAG = "Relationship";
-    
+
     @Column(name = "RemoteId", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     private Long mRemoteId;
     @Column(name = "SentToRemote")
     private boolean mSent;
-    @Column(name = "ParticpantOwner", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
+    @Column(name = "ParticpantOwner", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete =
+            Column.ForeignKeyAction.CASCADE)
     private Participant mParticipantOwner;
-    @Column(name = "ParticipantRelated", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
+    @Column(name = "ParticipantRelated", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete =
+            Column.ForeignKeyAction.CASCADE)
     private Participant mParticipantRelated;
     @Column(name = "UUID")
     private String mUUID;
     @Column(name = "RelationshipType")
     private RelationshipType mRelationshipType;
+    @Column(name = "Changed")
+    private boolean mChanged;
 
     public Relationship() {
         super();
     }
-    
+
     public Relationship(RelationshipType relationshipType) {
         super();
         mUUID = UUID.randomUUID().toString();
         mRelationshipType = relationshipType;
     }
-    
-    @Override
-    public boolean isPersistent() {
-        return true;
+
+    public static Relationship findByRemoteId(Long id) {
+        return new Select().from(Relationship.class).where("RemoteId = ?", id).executeSingle();
+    }
+
+    public static List<Relationship> getAll() {
+        return new Select().from(Relationship.class).orderBy("Id ASC").execute();
+    }
+
+    public static List<Relationship> getAllByParticipant(Participant participant) {
+        return new Select().from(Relationship.class).where("ParticpantOwner = ? OR " +
+                "ParticipantRelated = ?", participant.getId(), participant.getId()).execute();
     }
 
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-        
+
         try {
             JSONObject jsonObject = new JSONObject();
             if (getParticipantOwner() != null)
@@ -60,62 +73,9 @@ public class Relationship extends SendReceiveModel {
 
             json.put("relationship", jsonObject);
         } catch (JSONException je) {
-            Log.e(TAG, "JSON exception", je);
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
         return json;
-    }
-    
-    @Override
-    public void createObjectFromJSON(JSONObject jsonObject) {
-        try {
-            String uuid = jsonObject.getString("uuid");
-            Relationship relationship = Relationship.findByUUID(uuid);
-            if (relationship == null) {
-                relationship = this;
-            }
-            relationship.setUUID(uuid);
-            Long remoteId = jsonObject.getLong("id");
-            relationship.setRemoteId(remoteId);
-            Participant participantOwner = Participant.findByUUID(jsonObject.getString("participant_owner_uuid"));
-            if (participantOwner != null) {
-                relationship.setParticipantOwner(participantOwner);
-            }
-            
-            Participant participantRelated = Participant.findByUUID(jsonObject.getString("participant_related_uuid"));
-            if (participantRelated != null) {
-                relationship.setParticipantRelated(participantRelated);
-            }
-            
-            relationship.setRelationshipType(RelationshipType.findByRemoteId(jsonObject.getLong("relationship_type_id")));
-
-            if (jsonObject.isNull("deleted_at")) {
-                relationship.save();
-            } else {
-                Relationship rs = Relationship.findByUUID(uuid);
-                if (rs != null) {
-                    rs.delete();
-                }
-            }
-            
-        } catch(JSONException je) {
-            Log.e(TAG, "Error parsing object json", je);
-        }
-    }
-    
-    public static Relationship findByRemoteId(Long id) {
-        return new Select().from(Relationship.class).where("RemoteId = ?", id).executeSingle();
-    }
-    
-    public static Relationship findByUUID(String uuid) {
-        return new Select().from(Relationship.class).where("UUID = ?", uuid).executeSingle();
-    }
-    
-    public static List<Relationship> getAll() {
-        return new Select().from(Relationship.class).orderBy("Id ASC").execute();
-    }
-    
-    public static List<Relationship> getAllByParticipant(Participant participant) {
-    	return new Select().from(Relationship.class).where("ParticpantOwner = ? OR ParticipantRelated = ?", participant.getId(), participant.getId()).execute();
     }
 
     @Override
@@ -135,14 +95,19 @@ public class Relationship extends SendReceiveModel {
     }
 
     @Override
+    public boolean isPersistent() {
+        return true;
+    }
+
+    @Override
     public Long getRemoteId() {
         return mRemoteId;
     }
-    
+
     private void setRemoteId(Long remoteId) {
         mRemoteId = remoteId;
     }
-    
+
     public Participant getParticipantOwner() {
         return mParticipantOwner;
     }
@@ -159,6 +124,10 @@ public class Relationship extends SendReceiveModel {
         mParticipantRelated = participantRelated;
     }
 
+    public RelationshipType getRelationshipType() {
+        return mRelationshipType;
+    }
+
     public String getUUID() {
         return mUUID;
     }
@@ -167,12 +136,62 @@ public class Relationship extends SendReceiveModel {
         mUUID = uUID;
     }
 
-    public RelationshipType getRelationshipType() {
-        return mRelationshipType;
-    }
-
     public void setRelationshipType(RelationshipType relationshipType) {
         mRelationshipType = relationshipType;
+    }
+
+    @Override
+    public void createObjectFromJSON(JSONObject jsonObject) {
+        try {
+            String uuid = jsonObject.getString("uuid");
+            Relationship relationship = Relationship.findByUUID(uuid);
+            if (relationship == null) {
+                relationship = this;
+            }
+            relationship.setUUID(uuid);
+            Long remoteId = jsonObject.getLong("id");
+            relationship.setRemoteId(remoteId);
+            Participant participantOwner = Participant.findByUUID(jsonObject.getString
+                    ("participant_owner_uuid"));
+            if (participantOwner != null) {
+                relationship.setParticipantOwner(participantOwner);
+            }
+
+            Participant participantRelated = Participant.findByUUID(jsonObject.getString
+                    ("participant_related_uuid"));
+            if (participantRelated != null) {
+                relationship.setParticipantRelated(participantRelated);
+            }
+
+            relationship.setRelationshipType(RelationshipType.findByRemoteId(jsonObject.getLong
+                    ("relationship_type_id")));
+
+            if (jsonObject.isNull("deleted_at")) {
+                relationship.setChanged(false);
+                relationship.save();
+            } else {
+                Relationship rs = Relationship.findByUUID(uuid);
+                if (rs != null) {
+                    rs.delete();
+                }
+            }
+
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "Error parsing object json", je);
+        }
+    }
+
+    @Override
+    public boolean isChanged() {
+        return mChanged;
+    }
+
+    public void setChanged(boolean changed) {
+        mChanged = changed;
+    }
+
+    public static Relationship findByUUID(String uuid) {
+        return new Select().from(Relationship.class).where("UUID = ?", uuid).executeSingle();
     }
 
 }

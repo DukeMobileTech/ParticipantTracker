@@ -2,6 +2,7 @@ package org.adaptlab.chpir.android.activerecordcloudsync;
 
 import android.util.Log;
 
+import org.adaptlab.chpir.android.participanttracker.BuildConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -17,30 +18,26 @@ public class SendReceiveFetchr {
     private Class<? extends SendReceiveModel> mReceiveTableClass;
     private String mRemoteTableName;
 
-    public SendReceiveFetchr(String remoteTableName, Class<? extends SendReceiveModel> receiveTableClass) {
+    public SendReceiveFetchr(String remoteTableName, Class<? extends SendReceiveModel>
+            receiveTableClass) {
         mReceiveTableClass = receiveTableClass;
         mRemoteTableName = remoteTableName;
     }
 
-    public String getUrl(String urlSpec) throws IOException {
-        return new String(getUrlBytes(urlSpec));
-    }
-
     public void fetch() {
         if (ActiveRecordCloudSync.getEndPoint() == null) {
-            Log.i(TAG, "ActiveRecordCloudSync end point is not set!");
+            if (BuildConfig.DEBUG) Log.i(TAG, "ActiveRecordCloudSync end point is not set!");
             return;
         }
 
-        ActiveRecordCloudSync.setFetchCount(ActiveRecordCloudSync.getFetchCount() + 1);
         try {
             String url = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName
                     + ActiveRecordCloudSync.getParams();
-            Log.i(TAG, "Attempting to access " + url);
+            if (BuildConfig.DEBUG) Log.i(TAG, "Attempting to access " + url);
             String jsonString = getUrl(url);
-            Log.i(TAG, "Got JSON String: " + jsonString);
+            if (BuildConfig.DEBUG) Log.i(TAG, "Got JSON String: " + jsonString);
             JSONArray jsonArray = new JSONArray(jsonString);
-            Log.i(TAG, "Received json result: " + jsonArray);
+            if (BuildConfig.DEBUG) Log.i(TAG, "Received json result: " + jsonArray);
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 SendReceiveModel tableInstance = mReceiveTableClass.newInstance();
@@ -49,18 +46,22 @@ public class SendReceiveFetchr {
             ActiveRecordCloudSync.recordLastSyncTime();
 
         } catch (ConnectException cre) {
-            Log.e(TAG, "Connection was refused", cre);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Connection was refused", cre);
         } catch (IOException ioe) {
-            Log.e(TAG, "Failed to fetch items", ioe);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to fetch items", ioe);
         } catch (JSONException je) {
-            Log.e(TAG, "Failed to parse items", je);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to parse items", je);
         } catch (InstantiationException ie) {
-            Log.e(TAG, "Failed to instantiate receive table", ie);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to instantiate receive table", ie);
         } catch (IllegalAccessException iae) {
-            Log.e(TAG, "Failed to access receive table", iae);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to access receive table", iae);
         } catch (NullPointerException npe) {
-            Log.e(TAG, "Url is null", npe);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Url is null", npe);
         }
+    }
+
+    public String getUrl(String urlSpec) throws IOException {
+        return new String(getUrlBytes(urlSpec));
     }
 
     private byte[] getUrlBytes(String urlSpec) throws IOException {

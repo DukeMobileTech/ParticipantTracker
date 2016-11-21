@@ -33,12 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class NewParticipantFragment extends Fragment {
-    private static final String TAG = "NewParticipantFragment";
     public final static String EXTRA_PARTICIPANT_TYPE_ID =
             "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_type_id";
     public final static String EXTRA_PARTICIPANT_ID =
             "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_id";
-
+    private static final String TAG = "NewParticipantFragment";
     private ParticipantType mParticipantType;
     private Participant mParticipant;
     private HashMap<Long, View> mPropertyFields;
@@ -51,9 +50,11 @@ public class NewParticipantFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            mParticipantType = ParticipantType.findById(savedInstanceState.getLong(EXTRA_PARTICIPANT_TYPE_ID));
+            mParticipantType = ParticipantType.findById(savedInstanceState.getLong
+                    (EXTRA_PARTICIPANT_TYPE_ID));
         } else {
-            Long participantTypeId = getActivity().getIntent().getLongExtra(EXTRA_PARTICIPANT_TYPE_ID, -1);
+            Long participantTypeId = getActivity().getIntent().getLongExtra
+                    (EXTRA_PARTICIPANT_TYPE_ID, -1);
             if (participantTypeId == -1) return;
 
             mParticipantType = ParticipantType.findById(participantTypeId);
@@ -65,14 +66,12 @@ public class NewParticipantFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        View v = inflater.inflate(R.layout.fragment_new_participant, parent, false);
 
-        View v = inflater.inflate(R.layout.fragment_new_participant, parent,
-                false);
-
-        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id.new_participant_properties_container);
+        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id
+                .new_participant_properties_container);
 
         for (Property property : mParticipantType.getProperties()) {
             attachLabelForProperty(property);
@@ -104,12 +103,41 @@ public class NewParticipantFragment extends Fragment {
         }
     }
 
+    private void saveParticipant() {
+        if (isMissingRequiredValue() || hasInvalidValidator()) {
+            return;
+        }
+        mParticipant.setChanged(true);
+        mParticipant.save();
+
+        for (Property property : mParticipantType.getProperties()) {
+            ParticipantProperty participantProperty = mParticipant.getParticipantProperty(property);
+            participantProperty.setValue(getValueForProperty(property.getRemoteId()));
+            participantProperty.setChanged(true);
+            participantProperty.save();
+        }
+
+        for (RelationshipType relationshipType : mRelationshipFields.keySet()) {
+            Relationship relationship = mParticipant.getRelationshipByRelationshipType
+                    (relationshipType);
+            relationship.setParticipantOwner(mParticipant);
+            relationship.setParticipantRelated(mRelationshipFields.get(relationshipType));
+            relationship.setChanged(true);
+            relationship.save();
+        }
+
+        getActivity().setResult(Activity.RESULT_OK);
+        getActivity().finish();
+    }
+
     private boolean isMissingRequiredValue() {
         boolean missingField = false;
         for (Property property : mParticipantType.getProperties()) {
-            if (property.getRequired() && getValueForProperty(property.getRemoteId()).trim().equals("")) {
+            if (property.getRequired() && getValueForProperty(property.getRemoteId()).trim()
+                    .equals("")) {
                 if (mPropertyFields.get(property.getRemoteId()) instanceof EditText) {
-                    ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R.string.required_field));
+                    ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R
+                            .string.required_field));
                 }
                 missingField = true;
             }
@@ -121,9 +149,11 @@ public class NewParticipantFragment extends Fragment {
     private boolean hasInvalidValidator() {
         boolean invalid = false;
         for (Property property : mParticipantType.getProperties()) {
-            if (property.hasValidator() && !property.getValidationCallable().validate(getValueForProperty(property.getRemoteId()))) {
+            if (property.hasValidator() && !property.getValidationCallable().validate
+                    (getValueForProperty(property.getRemoteId()))) {
                 if (mPropertyFields.get(property.getRemoteId()) instanceof EditText) {
-                    ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R.string.invalid_validator));
+                    ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R
+                            .string.invalid_validator));
                 }
 
                 Toast.makeText(getActivity(),
@@ -137,13 +167,12 @@ public class NewParticipantFragment extends Fragment {
         return invalid;
     }
 
-    private void attachRequiredLabel(Property property) {
-        if (property.getRequired()) {
-            TextView requiredTextView = new TextView(getActivity());
-            requiredTextView.setText(getString(R.string.required_field));
-            requiredTextView.setTextColor(Color.RED);
-            mParticipantPropertiesContainer.addView(requiredTextView);
-        }
+    private String getValueForProperty(Long property) {
+        if (mPropertyFields.get(property) instanceof EditText)
+            return ((EditText) mPropertyFields.get(property)).getText().toString();
+        else if (mPropertyFields.get(property) instanceof SerializableDatePicker)
+            return ((SerializableDatePicker) mPropertyFields.get(property)).serialize();
+        return "";
     }
 
     private void attachLabelForProperty(Property property) {
@@ -167,7 +196,8 @@ public class NewParticipantFragment extends Fragment {
 
         if (property.getTypeOf() == Property.PropertyType.INTEGER) {
             propertyView = new EditText(getActivity());
-            ((EditText) propertyView).setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+            ((EditText) propertyView).setInputType(InputType.TYPE_CLASS_NUMBER | InputType
+                    .TYPE_NUMBER_FLAG_SIGNED);
             ((EditText) propertyView).setText(propertyValue);
             attachValidator(property, (EditText) propertyView);
         } else if (property.getTypeOf() == Property.PropertyType.DATE) {
@@ -184,9 +214,54 @@ public class NewParticipantFragment extends Fragment {
         mParticipantPropertiesContainer.addView(propertyView);
     }
 
+    private void attachRequiredLabel(Property property) {
+        if (property.getRequired()) {
+            TextView requiredTextView = new TextView(getActivity());
+            requiredTextView.setText(getString(R.string.required_field));
+            requiredTextView.setTextColor(Color.RED);
+            mParticipantPropertiesContainer.addView(requiredTextView);
+        }
+    }
+
+    private void attachSelectRelationshipButton(final RelationshipType relationshipType) {
+        TextView textView = new TextView(getActivity());
+        textView.setTextAppearance(getActivity(), R.style.sectionHeader);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(0, 50, 0, 0);
+        textView.setLayoutParams(layoutParams);
+        mParticipantPropertiesContainer.addView(textView);
+        textView.setText(relationshipType.getLabel());
+
+        final Button button = new Button(getActivity());
+
+        if (mParticipant.hasRelationshipByRelationshipType(relationshipType)) {
+            Participant relatedParticipant = mParticipant.getRelationshipByRelationshipType
+                    (relationshipType).getParticipantRelated();
+            button.setText(relatedParticipant.getLabel());
+            mRelationshipFields.put(relationshipType, relatedParticipant);
+        } else {
+            button.setText("Select " + relationshipType.getRelatedParticipantType().getLabel());
+        }
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                displayRelationshipPicker(relationshipType, button);
+            }
+        });
+        mParticipantPropertiesContainer.addView(button);
+    }
+
     private void attachValidator(final Property property, final EditText propertyView) {
         propertyView.addTextChangedListener(new TextWatcher() {
             private boolean backspacing = false;
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                backspacing = before > count;
+            }
 
             public void afterTextChanged(Editable s) {
                 if (!property.hasValidator()) return;
@@ -208,80 +283,27 @@ public class NewParticipantFragment extends Fragment {
                             .Mode.SRC_ATOP);
                 }
             }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                backspacing = before > count;
-            }
         });
     }
 
-    private void attachSelectRelationshipButton(final RelationshipType relationshipType) {
-        TextView textView = new TextView(getActivity());
-        textView.setTextAppearance(getActivity(), R.style.sectionHeader);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(0, 50, 0, 0);
-        textView.setLayoutParams(layoutParams);
-        mParticipantPropertiesContainer.addView(textView);
-        textView.setText(relationshipType.getLabel());
-
-        final Button button = new Button(getActivity());
-
-        if (mParticipant.hasRelationshipByRelationshipType(relationshipType)) {
-            Participant relatedParticipant = mParticipant.getRelationshipByRelationshipType(relationshipType).getParticipantRelated();
-            button.setText(relatedParticipant.getLabel());
-            mRelationshipFields.put(relationshipType, relatedParticipant);
-        } else {
-            button.setText("Select " + relationshipType.getRelatedParticipantType().getLabel());
-        }
-
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                displayRelationshipPicker(relationshipType, button);
-            }
-        });
-        mParticipantPropertiesContainer.addView(button);
-    }
-
-    private void saveParticipant() {
-        if (isMissingRequiredValue() || hasInvalidValidator()) {
-            return;
-        }
-
-        mParticipant.save();
-
-        for (Property property : mParticipantType.getProperties()) {
-            ParticipantProperty participantProperty = mParticipant.getParticipantProperty(property);
-            participantProperty.setValue(getValueForProperty(property.getRemoteId()));
-            participantProperty.save();
-        }
-
-        for (RelationshipType relationshipType : mRelationshipFields.keySet()) {
-            Relationship relationship = mParticipant.getRelationshipByRelationshipType(relationshipType);
-            relationship.setParticipantOwner(mParticipant);
-            relationship.setParticipantRelated(mRelationshipFields.get(relationshipType));
-            relationship.save();
-        }
-
-        getActivity().setResult(Activity.RESULT_OK);
-        getActivity().finish();
-    }
-
-    public void displayRelationshipPicker(final RelationshipType relationshipType, final Button button) {
+    public void displayRelationshipPicker(final RelationshipType relationshipType, final Button
+            button) {
         Property childIDProperty = Property.findByLabel("Child ID");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Choose " + relationshipType.getRelatedParticipantType().getLabel());
         final List<Participant> relationshipParticipants;
-        if (mParticipant.getParticipantType().getLabel().equals("Child") && mParticipant.getParticipantProperty(childIDProperty).getValue() != null) {
-            relationshipParticipants = Participant.getAllCaregiversByCenter(relationshipType.getRelatedParticipantType(),
-                    mParticipant.getParticipantProperty(childIDProperty).getValue().substring(2,5));
+        if (mParticipant.getParticipantType().getLabel().equals("Child") && mParticipant
+                .getParticipantProperty(childIDProperty).getValue() != null) {
+            relationshipParticipants = Participant.getAllCaregiversByCenter(relationshipType
+                            .getRelatedParticipantType(),
+                    mParticipant.getParticipantProperty(childIDProperty).getValue().substring(2,
+                            5));
         } else {
-            relationshipParticipants = Participant.getAllByParticipantType(relationshipType.getRelatedParticipantType());
+            relationshipParticipants = Participant.getAllByParticipantType(relationshipType
+                    .getRelatedParticipantType());
         }
-        CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants.size()];
+        CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants
+                .size()];
 
         for (int i = 0; i < relationshipParticipants.size(); i++) {
             relationshipParticipantLabels[i] = relationshipParticipants.get(i).getLabel();
@@ -292,9 +314,11 @@ public class NewParticipantFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                int selectedPosition = ((AlertDialog) dialog).getListView()
+                        .getCheckedItemPosition();
                 if (selectedPosition == -1) return;
-                mRelationshipFields.put(relationshipType, relationshipParticipants.get(selectedPosition));
+                mRelationshipFields.put(relationshipType, relationshipParticipants.get
+                        (selectedPosition));
                 button.setText(relationshipParticipants.get(selectedPosition).getLabel());
             }
         });
@@ -313,18 +337,11 @@ public class NewParticipantFragment extends Fragment {
         Long participantId = getActivity().getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
         if (participantId == -1) {
             mParticipant = new Participant(mParticipantType);
-            getActivity().setTitle(getString(R.string.new_participant_prefix) + mParticipantType.getLabel());
+            getActivity().setTitle(getString(R.string.new_participant_prefix) + mParticipantType
+                    .getLabel());
         } else {
             mParticipant = Participant.findById(participantId);
             getActivity().setTitle(mParticipant.getLabel());
         }
-    }
-
-    private String getValueForProperty(Long property) {
-        if (mPropertyFields.get(property) instanceof EditText)
-            return ((EditText) mPropertyFields.get(property)).getText().toString();
-        else if (mPropertyFields.get(property) instanceof SerializableDatePicker)
-            return ((SerializableDatePicker) mPropertyFields.get(property)).serialize();
-        return "";
     }
 }
