@@ -90,7 +90,6 @@ public class ActiveRecordCloudSync {
             httpPushr.push();
         }
 
-        ActiveRecordCloudSync.recordLastSyncTime();
         NetworkNotificationUtils.showNotification(context, android.R.drawable
                 .stat_sys_download_done, R.string.sync_notification_complete_text);
     }
@@ -107,14 +106,11 @@ public class ActiveRecordCloudSync {
         } catch (JSONException je) {
             if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
-
-        HttpLogin httpLogin = new HttpLogin();
-        httpLogin.login(json);
+        new HttpLogin().login(json);
     }
 
     public static void logoutUser() {
-        HttpLogin httpLogin = new HttpLogin();
-        httpLogin.logout();
+        new HttpLogin().logout();
     }
 
     public static boolean isApiAvailable() {

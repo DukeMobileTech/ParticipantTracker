@@ -2,6 +2,8 @@ package org.adaptlab.chpir.android.activerecordcloudsync;
 
 import android.util.Log;
 
+import com.activeandroid.ActiveAndroid;
+
 import org.adaptlab.chpir.android.participanttracker.BuildConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,11 +41,16 @@ public class SendReceiveFetchr {
             JSONArray jsonArray = new JSONArray(jsonString);
             if (BuildConfig.DEBUG) Log.i(TAG, "Received json result: " + jsonArray);
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                SendReceiveModel tableInstance = mReceiveTableClass.newInstance();
-                tableInstance.createObjectFromJSON(jsonArray.getJSONObject(i));
+            ActiveAndroid.beginTransaction();
+            try {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    SendReceiveModel tableInstance = mReceiveTableClass.newInstance();
+                    tableInstance.createObjectFromJSON(jsonArray.getJSONObject(i));
+                }
+                ActiveAndroid.setTransactionSuccessful();
+            } finally {
+                ActiveAndroid.endTransaction();
             }
-            ActiveRecordCloudSync.recordLastSyncTime();
 
         } catch (ConnectException cre) {
             if (BuildConfig.DEBUG) Log.e(TAG, "Connection was refused", cre);
