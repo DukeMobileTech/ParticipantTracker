@@ -78,6 +78,20 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:ems="10" />
+
+		   <TextView
+			   android:id="@+id/project_id_label"
+			   android:layout_width="wrap_content"
+			   android:layout_height="wrap_content"
+			   android:layout_marginTop="10dp"
+			   android:text="@string/project_id"/>
+
+		   <EditText
+			   android:id="@+id/project_id_text"
+			   android:layout_width="match_parent"
+			   android:layout_height="wrap_content"
+			   android:inputType="number"
+			   android:ems="10" />
             
             <TextView
                 android:id="@+id/api_key_label"

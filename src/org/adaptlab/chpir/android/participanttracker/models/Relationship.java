@@ -186,6 +186,11 @@ public class Relationship extends SendReceiveModel {
         return mChanged;
     }
 
+    @Override
+    public boolean belongsToCurrentProject() {
+        return mParticipantOwner.getProjectId().equals(AdminSettings.getInstance().getProjectId());
+    }
+
     public void setChanged(boolean changed) {
         mChanged = changed;
     }

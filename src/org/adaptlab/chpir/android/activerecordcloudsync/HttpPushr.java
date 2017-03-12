@@ -42,7 +42,9 @@ public class HttpPushr {
         try {
             if (isPersistent()) {
                 for (SendReceiveModel element : allElements) {
-                    if (element.isChanged()) sendData(element);
+                    if (element.isChanged() && element.belongsToCurrentProject()) {
+                        sendData(element);
+                    }
                 }
             } else {
                 sendData(mSendTableClass.newInstance());

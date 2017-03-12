@@ -5,4 +5,5 @@ import org.json.JSONObject;
 public abstract class SendReceiveModel extends SendModel {
     public abstract void createObjectFromJSON(JSONObject jsonObject);
     public abstract boolean isChanged();
+    public abstract boolean belongsToCurrentProject();
 }
