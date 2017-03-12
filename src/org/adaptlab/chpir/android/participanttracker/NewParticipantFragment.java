@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.adaptlab.chpir.android.participanttracker.models.AdminSettings;
 import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantProperty;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantType;
@@ -108,6 +109,7 @@ public class NewParticipantFragment extends Fragment {
             return;
         }
         mParticipant.setChanged(true);
+        mParticipant.setProjectId(AdminSettings.getInstance().getProjectId());
         mParticipant.save();
 
         for (Property property : mParticipantType.getProperties()) {
@@ -288,20 +290,11 @@ public class NewParticipantFragment extends Fragment {
 
     public void displayRelationshipPicker(final RelationshipType relationshipType, final Button
             button) {
-        Property childIDProperty = Property.findByLabel("Child ID");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Choose " + relationshipType.getRelatedParticipantType().getLabel());
         final List<Participant> relationshipParticipants;
-        if (mParticipant.getParticipantType().getLabel().equals("Child") && mParticipant
-                .getParticipantProperty(childIDProperty).getValue() != null) {
-            relationshipParticipants = Participant.getAllCaregiversByCenter(relationshipType
-                            .getRelatedParticipantType(),
-                    mParticipant.getParticipantProperty(childIDProperty).getValue().substring(2,
-                            5));
-        } else {
-            relationshipParticipants = Participant.getAllByParticipantType(relationshipType
-                    .getRelatedParticipantType());
-        }
+        relationshipParticipants = Participant.getAllByParticipantType(relationshipType
+                .getRelatedParticipantType());
         CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants
                 .size()];
 

@@ -28,6 +28,8 @@ public class AdminSettings extends Model {
     private String mDeviceLabel;
     @Column(name = "LastSyncTime")
     private String mLastSyncTime;
+    @Column(name = "ProjectId")
+    private Long mProjectId;
 
     public AdminSettings() {
         super();
@@ -120,6 +122,15 @@ public class AdminSettings extends Model {
     public void setLastSyncTime(String time) {
         mLastSyncTime = time;
         save();
+    }
+
+    public void setProjectId(Long id) {
+        mProjectId = id;
+        save();
+    }
+
+    public Long getProjectId() {
+        return mProjectId;
     }
 
 }

@@ -67,12 +67,15 @@ public class AppUtil {
 
     public static String getAdminSettingsInstanceApiUrl() {
         String domainName = AdminSettings.getInstance().getApiUrl();
-        return domainName + "api/" + AdminSettings.getInstance().getApiVersion() + "/";
+        return domainName + "api/" + AdminSettings.getInstance().getApiVersion() + "/" +
+                "projects/" + AdminSettings.getInstance().getProjectId() + "/";
     }
 
     private static boolean hasPassedDeviceSecurityChecks(Context context) {
-        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (devicePolicyManager.getStorageEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService
+                (Context.DEVICE_POLICY_SERVICE);
+        if (devicePolicyManager.getStorageEncryptionStatus() != DevicePolicyManager
+                .ENCRYPTION_STATUS_ACTIVE) {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.encryption_required_title)
                     .setMessage(R.string.encryption_required_text)
@@ -94,7 +97,8 @@ public class AppUtil {
         ActiveRecordCloudSync.addReceiveTable("properties", Property.class);
         ActiveRecordCloudSync.addReceiveTable("relationship_types", RelationshipType.class);
         ActiveRecordCloudSync.addSendReceiveTable("participants", Participant.class);
-        ActiveRecordCloudSync.addSendReceiveTable("participant_properties", ParticipantProperty.class);
+        ActiveRecordCloudSync.addSendReceiveTable("participant_properties", ParticipantProperty
+                .class);
         ActiveRecordCloudSync.addSendReceiveTable("relationships", Relationship.class);
         ActiveRecordCloudSync.addSendTable("device_sync_entries", DeviceSyncEntry.class);
     }

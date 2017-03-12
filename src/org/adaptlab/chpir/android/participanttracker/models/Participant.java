@@ -31,6 +31,8 @@ public class Participant extends SendReceiveModel {
     private Long mRemoteId;
     @Column(name = "Changed")
     private boolean mChanged;
+    @Column(name = "ProjectId")
+    private Long mProjectId;
 
     public Participant() {
         super();
@@ -53,22 +55,8 @@ public class Participant extends SendReceiveModel {
                 .innerJoin(ParticipantProperty.class)
                 .on("Participant.Id = ParticipantProperty.Participant AND Participant" +
                                 ".ParticipantType = ? AND ParticipantProperty.Value LIKE ?",
-                        participantType.getId(),
-                        "%" + query + "%")
-                .orderBy("Participant.Id DESC")
-                .execute();
-    }
-
-    public static List<Participant> getAllCaregiversByCenter(ParticipantType participantType,
-                                                             String query) {
-        return new Select("Participant.*")
-                .distinct()
-                .from(Participant.class)
-                .innerJoin(ParticipantProperty.class)
-                .on("Participant.Id = ParticipantProperty.Participant AND Participant" +
-                                ".ParticipantType = ? AND ParticipantProperty.Value LIKE ?",
-                        participantType.getId(),
-                        "__" + query + "%")
+                        participantType.getId(), "%" + query + "%")
+                .where("Participant.ProjectId = ?", AdminSettings.getInstance().getProjectId())
                 .orderBy("Participant.Id DESC")
                 .execute();
     }
@@ -91,7 +79,6 @@ public class Participant extends SendReceiveModel {
                 .where("Property.ParticipantType = ? AND Property.UseToSort = ?", participantType
                         .getId(), 1)
                 .executeSingle();
-
         if (sortingProperty != null) {
             return new Select("Participant.*")
                     .distinct()
@@ -99,12 +86,14 @@ public class Participant extends SendReceiveModel {
                     .innerJoin(ParticipantProperty.class)
                     .on("Participant.Id = ParticipantProperty.Participant AND ParticipantProperty" +
                             ".Property = ?", sortingProperty.getId())
+                    .where("Participant.ProjectId = ?", AdminSettings.getInstance().getProjectId())
                     .orderBy("ParticipantProperty.Value")
                     .execute();
         } else {
             return new Select()
                     .from(Participant.class)
-                    .where("ParticipantType = ?", participantType.getId())
+                    .where("ParticipantType = ? AND ProjectId = ?", participantType.getId(),
+                            AdminSettings.getInstance().getProjectId())
                     .orderBy("Id DESC")
                     .execute();
         }
@@ -127,7 +116,8 @@ public class Participant extends SendReceiveModel {
             // TODO: Change to participant id
             jsonObject.put("participant_type_id", getParticipantType().getRemoteId());
             jsonObject.put("uuid", getUUID());
-
+            jsonObject.put("project_id", AdminSettings.getInstance().getProjectId());
+            // TODO: 3/12/17 Delete participants that have been deleted remotely
             if (this.getRemoteId() == null) {
                 jsonObject.put("device_uuid", AdminSettings.getInstance().getDeviceIdentifier());
                 jsonObject.put("device_label", AdminSettings.getInstance().getDeviceLabel());
@@ -184,6 +174,14 @@ public class Participant extends SendReceiveModel {
 
     private void setRemoteId(Long id) {
         mRemoteId = id;
+    }
+
+    public Long getProjectId() {
+        return mProjectId;
+    }
+
+    public void setProjectId(Long id) {
+        mProjectId = id;
     }
 
     public boolean hasParticipantProperty(Property property) {
@@ -285,6 +283,8 @@ public class Participant extends SendReceiveModel {
             participant.setUUID(uuid);
             Long remoteId = jsonObject.getLong("id");
             participant.setRemoteId(remoteId);
+            Long projectId = jsonObject.getLong("project_id");
+            participant.setProjectId(projectId);
             Long participantTypeId = jsonObject.getLong("participant_type_id");
             ParticipantType participantType = ParticipantType.findByRemoteId(participantTypeId);
             if (participantType != null) {
@@ -323,6 +323,11 @@ public class Participant extends SendReceiveModel {
     @Override
     public boolean isChanged() {
         return mChanged;
+    }
+
+    @Override
+    public boolean belongsToCurrentProject() {
+        return (mProjectId.equals(AdminSettings.getInstance().getProjectId()));
     }
 
     public void setChanged(boolean changed) {

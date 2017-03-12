@@ -54,4 +54,5 @@
     <string name="days">días</string>
     <string name="age">Edad Hoy</string>
     <string name="or">Ó</string>
+    <string name="project_id">Project Id</string>
 </resources>
