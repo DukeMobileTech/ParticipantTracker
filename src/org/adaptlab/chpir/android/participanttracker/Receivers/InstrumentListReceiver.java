@@ -1,4 +1,4 @@
-package org.adaptlab.chpir.android.participanttracker.Receivers;
+package org.adaptlab.chpir.android.participanttracker.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

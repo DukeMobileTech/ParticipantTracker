@@ -22,8 +22,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.adaptlab.chpir.android.participanttracker.Receivers.InstrumentListReceiver;
-import org.adaptlab.chpir.android.participanttracker.Receivers.ReceivedInstrumentDetails;
+import org.adaptlab.chpir.android.participanttracker.receivers.InstrumentListReceiver;
+import org.adaptlab.chpir.android.participanttracker.receivers.ReceivedInstrumentDetails;
 import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantProperty;
 import org.adaptlab.chpir.android.participanttracker.models.Property;

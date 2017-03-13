@@ -79,21 +79,23 @@ public class Participant extends SendReceiveModel {
                 .where("Property.ParticipantType = ? AND Property.UseToSort = ?", participantType
                         .getId(), 1)
                 .executeSingle();
+        String projectId = (AdminSettings.getInstance().getProjectId() == null) ? "-1" :
+                AdminSettings.getInstance().getProjectId().toString();
         if (sortingProperty != null) {
             return new Select("Participant.*")
                     .distinct()
                     .from(Participant.class)
                     .innerJoin(ParticipantProperty.class)
                     .on("Participant.Id = ParticipantProperty.Participant AND ParticipantProperty" +
-                            ".Property = ?", sortingProperty.getId())
-                    .where("Participant.ProjectId = ?", AdminSettings.getInstance().getProjectId())
+                            ".Property = ? AND Participant.ProjectId = ?", sortingProperty.getId(),
+                            projectId)
                     .orderBy("ParticipantProperty.Value")
                     .execute();
         } else {
             return new Select()
                     .from(Participant.class)
                     .where("ParticipantType = ? AND ProjectId = ?", participantType.getId(),
-                            AdminSettings.getInstance().getProjectId())
+                            projectId)
                     .orderBy("Id DESC")
                     .execute();
         }
@@ -327,7 +329,8 @@ public class Participant extends SendReceiveModel {
 
     @Override
     public boolean belongsToCurrentProject() {
-        return (mProjectId.equals(AdminSettings.getInstance().getProjectId()));
+        return AdminSettings.getInstance().getProjectId() != null &&
+                mProjectId.equals(AdminSettings.getInstance().getProjectId());
     }
 
     public void setChanged(boolean changed) {
