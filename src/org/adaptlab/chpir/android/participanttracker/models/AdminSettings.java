@@ -8,6 +8,8 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
 import org.adaptlab.chpir.android.participanttracker.BuildConfig;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @Table(name = "AdminSettings")
 public class AdminSettings extends Model {
@@ -115,12 +117,35 @@ public class AdminSettings extends Model {
     }
 
     public String getLastSyncTime() {
-        if (mLastSyncTime == null) return "";
-        return mLastSyncTime;
+        String lastSyncTime = "";
+        if (mLastSyncTime == null) {
+            return lastSyncTime;
+        }
+        try {
+            JSONObject projectLastSyncTime = new JSONObject(mLastSyncTime);
+            if (!projectLastSyncTime.isNull(String.valueOf(getProjectId()))) {
+                lastSyncTime = projectLastSyncTime.getString(String.valueOf(getProjectId()));
+            }
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        return lastSyncTime;
     }
 
+    // Set last sync times based on project Id
     public void setLastSyncTime(String time) {
-        mLastSyncTime = time;
+        JSONObject projectTime = new JSONObject();
+        try {
+            if (mLastSyncTime == null) {
+                projectTime = new JSONObject();
+            } else {
+                projectTime = new JSONObject(mLastSyncTime);
+            }
+            projectTime.put(String.valueOf(getProjectId()), time);
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        mLastSyncTime = projectTime.toString();
         save();
     }
 

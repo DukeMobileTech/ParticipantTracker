@@ -54,11 +54,16 @@ public class Participant extends SendReceiveModel {
                 .from(Participant.class)
                 .innerJoin(ParticipantProperty.class)
                 .on("Participant.Id = ParticipantProperty.Participant AND Participant" +
-                                ".ParticipantType = ? AND ParticipantProperty.Value LIKE ?",
-                        participantType.getId(), "%" + query + "%")
-                .where("Participant.ProjectId = ?", AdminSettings.getInstance().getProjectId())
+                                ".ParticipantType = ? AND Participant.ProjectId = ? AND " +
+                        "ParticipantProperty.Value LIKE ?", participantType.getId(),
+                        getCurrentProjectId(), "%" + query + "%")
                 .orderBy("Participant.Id DESC")
                 .execute();
+    }
+
+    private static String getCurrentProjectId() {
+        return (AdminSettings.getInstance().getProjectId() == null) ? "-1" :
+                    AdminSettings.getInstance().getProjectId().toString();
     }
 
     public static int getCount() {
@@ -79,8 +84,6 @@ public class Participant extends SendReceiveModel {
                 .where("Property.ParticipantType = ? AND Property.UseToSort = ?", participantType
                         .getId(), 1)
                 .executeSingle();
-        String projectId = (AdminSettings.getInstance().getProjectId() == null) ? "-1" :
-                AdminSettings.getInstance().getProjectId().toString();
         if (sortingProperty != null) {
             return new Select("Participant.*")
                     .distinct()
@@ -88,14 +91,14 @@ public class Participant extends SendReceiveModel {
                     .innerJoin(ParticipantProperty.class)
                     .on("Participant.Id = ParticipantProperty.Participant AND ParticipantProperty" +
                             ".Property = ? AND Participant.ProjectId = ?", sortingProperty.getId(),
-                            projectId)
+                            getCurrentProjectId())
                     .orderBy("ParticipantProperty.Value")
                     .execute();
         } else {
             return new Select()
                     .from(Participant.class)
                     .where("ParticipantType = ? AND ProjectId = ?", participantType.getId(),
-                            projectId)
+                            getCurrentProjectId())
                     .orderBy("Id DESC")
                     .execute();
         }

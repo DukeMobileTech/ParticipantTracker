@@ -30,6 +30,7 @@
     <string name="last_update">Last update:  </string>
     <string name="system_information">System Information</string>
     <string name="version_code">Version Code: </string>
+    <string name="version_name">Version Name: </string>
     <string name="participants_loading_header">Loading Participants</string>
     <string name="participants_loading_message">Please wait a moment</string>
     <string name="login_button">Login</string>
@@ -60,4 +61,6 @@
     <string name="up_to_date">Your application is up to date</string>
     <string name="check_for_updates">Check For Updates</string>
     <string name="re_check_for_updates">Recheck for updates after granting storage permission</string>
+    <string name="reset_last_sync_time">Reset Last Sync Time</string>
+    <string name="last_sync_time">Last Sync Time: </string>
 </resources>

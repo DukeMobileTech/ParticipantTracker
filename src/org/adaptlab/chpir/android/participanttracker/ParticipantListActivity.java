@@ -310,8 +310,7 @@ public class ParticipantListActivity extends FragmentActivity implements
 
         private ParticipantType getParticipantType() {
             int participantTypeId = getArguments().getInt(ARG_SECTION_NUMBER, 0);
-            ParticipantType participantType = ParticipantType.getAll().get(participantTypeId);
-            return participantType;
+            return ParticipantType.getAll().get(participantTypeId);
         }
     }
 
