@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LSTracker</string>
+    <string name="action_admin">Admin</string>
     <string name="action_settings">Settings</string>
     <string name="refresh">Refresh</string>
     <string name="sync_notification_text">Syncing with server ...</string>   
@@ -38,7 +39,8 @@
     <string name="edit">Edit</string>
     <string name="encryption_required_title">Encryption required</string> 
     <string name="encryption_required_text">This application requires that the device be encrypted.  Please encrypt your device to continue.</string>
-    <string name="new_apk">This application has a newer version. Would you like to update it to the newer version?</string>
+    <string name="new_apk_title">Newer version available</string>
+    <string name="new_apk_message">Would you like to update the application to the newer version?</string>
     <string name="enter_email">Enter email</string>
     <string name="enter_password">Enter password</string>
     <string name="device_label">Device Label</string>
@@ -55,4 +57,7 @@
     <string name="age">Age Today</string>
     <string name="or">OR</string>
     <string name="project_id">Project Id</string>
+    <string name="up_to_date">Your application is up to date</string>
+    <string name="check_for_updates">Check For Updates</string>
+    <string name="re_check_for_updates">Recheck for updates after granting storage permission</string>
 </resources>

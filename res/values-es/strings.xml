@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LSTracker</string>
-    <string name="action_settings">Ajustes</string>
+    <string name="action_admin">Ajustes</string>
     <string name="refresh">Actualizar</string>
     <string name="sync_notification_text">Sincronizando con el servidor...</string>   
     <string name="sync_notification_complete_text">Sincronización con el servidor completa.</string>    
@@ -38,7 +38,7 @@
     <string name="edit">Editar</string>
     <string name="encryption_required_title">Codificación requerida</string> 
     <string name="encryption_required_text">Esta aplicación requiere que el dispositivo sea codificado . Por favor codifique su dispositivo para continuar.</string>
-    <string name="new_apk">Esta aplicación cuenta con una versión más nueva. ¿Te gustaría actualizarla a la versión más reciente?</string>
+    <string name="new_apk_message">Esta aplicación cuenta con una versión más nueva. ¿Te gustaría actualizarla a la versión más reciente?</string>
     <string name="enter_email">Introduzca correo electrónico</string>
     <string name="enter_password">Introduzca contraseña</string>
     <string name="device_label">Device Label</string>

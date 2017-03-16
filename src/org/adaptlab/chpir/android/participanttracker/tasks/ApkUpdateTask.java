@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.adaptlab.chpir.android.activerecordcloudsync.ActiveRecordCloudSync;
 import org.adaptlab.chpir.android.activerecordcloudsync.NetworkNotificationUtils;
@@ -75,19 +76,18 @@ public class ApkUpdateTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void param) {
         if (mLatestVersion == null || mLatestVersion <= AppUtil.getVersionCode(mContext)) {
-            new SyncTablesTask(mContext).execute();
+            Toast.makeText(mContext, R.string.up_to_date, Toast.LENGTH_LONG).show();
         } else {
             new AlertDialog.Builder(mContext)
-                    .setMessage(R.string.new_apk)
+                    .setTitle(R.string.new_apk_title)
+                    .setMessage(R.string.new_apk_message)
                     .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int button) {
                             new DownloadApkTask().execute();
                         }
                     })
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            new SyncTablesTask(mContext).execute();
-                        }
+                        public void onClick(DialogInterface dialog, int id) {}
                     }).show();
         }
     }
@@ -146,18 +146,18 @@ public class ApkUpdateTask extends AsyncTask<Void, Void, Void> {
             File path = Environment.getExternalStoragePublicDirectory(Environment
                     .DIRECTORY_DOWNLOADS);
             mFile = new File(path, mFileName);
-            FileOutputStream filewriter = null;
+            FileOutputStream fileWriter = null;
             try {
                 byte[] imageBytes = getUrlBytes(url);
-                filewriter = new FileOutputStream(mFile);
-                filewriter.write(imageBytes);
+                fileWriter = new FileOutputStream(mFile);
+                fileWriter.write(imageBytes);
                 if (BuildConfig.DEBUG) Log.i(TAG, "APK saved in " + mFile.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 try {
-                    if (filewriter != null)
-                        filewriter.close();
+                    if (fileWriter != null)
+                        fileWriter.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

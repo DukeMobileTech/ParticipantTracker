@@ -15,7 +15,7 @@ import android.widget.EditText;
 
 import org.adaptlab.chpir.android.activerecordcloudsync.ActiveRecordCloudSync;
 import org.adaptlab.chpir.android.activerecordcloudsync.NetworkNotificationUtils;
-import org.adaptlab.chpir.android.participanttracker.tasks.ApkUpdateTask;
+import org.adaptlab.chpir.android.participanttracker.tasks.SyncTablesTask;
 
 public class LoginFragment extends Fragment {
 
@@ -79,13 +79,12 @@ public class LoginFragment extends Fragment {
         @Override
         protected void onPostExecute(Void param) {
             if (ActiveRecordCloudSync.getAuthToken() != null) {
-                new ApkUpdateTask(getActivity()).execute();
+                new SyncTablesTask(getActivity()).execute();
             } else {
                 new AlertDialog.Builder(getActivity())
                         .setMessage(R.string.email_password_mismatch)
                         .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int button) {
-                            }
+                            public void onClick(DialogInterface dialog, int button) {}
                         }).show();
             }
         }

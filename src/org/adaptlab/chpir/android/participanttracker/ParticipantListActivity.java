@@ -68,11 +68,14 @@ public class ParticipantListActivity extends FragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings:
+            case R.id.menu_action_admin:
                 displayPassWordPrompt();
                 return true;
             case R.id.menu_item_refresh:
                 authenticateUser();
+                return true;
+            case R.id.menu_item_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
