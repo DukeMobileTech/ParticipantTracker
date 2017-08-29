@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import org.adaptlab.chpir.android.activerecordcloudsync.ActiveRecordCloudSync;
-import org.adaptlab.chpir.android.activerecordcloudsync.NetworkNotificationUtils;
 import org.adaptlab.chpir.android.participanttracker.tasks.SyncTablesTask;
 
 public class LoginFragment extends Fragment {
@@ -70,9 +69,7 @@ public class LoginFragment extends Fragment {
 
         @Override
         protected Void doInBackground(String... params) {
-            if (NetworkNotificationUtils.checkForNetworkErrors(getActivity())) {
-                ActiveRecordCloudSync.authenticateUser(params[0], params[1]);
-            }
+            ActiveRecordCloudSync.authenticateUser(params[0], params[1]);
             return null;
         }
 
