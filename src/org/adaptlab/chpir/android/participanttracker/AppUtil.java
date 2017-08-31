@@ -10,8 +10,10 @@ import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
@@ -53,10 +55,7 @@ public class AppUtil {
         ADMIN_PASSWORD_HASH = context.getResources().getString(R.string.admin_password_hash);
         ACCESS_TOKEN = AdminSettings.getInstance().getApiKey();
 
-        if (AdminSettings.getInstance().getDeviceIdentifier() == null) {
-            AdminSettings.getInstance().setDeviceIdentifier(
-                    UUID.randomUUID().toString());
-        }
+        setDeviceProperties();
 
         if (!BuildConfig.DEBUG) {
             Fabric.with(mContext, new Crashlytics());
@@ -70,6 +69,15 @@ public class AppUtil {
         addDataTables();
         seedDb();
         requestNeededPermissions();
+    }
+
+    private static void setDeviceProperties() {
+        if (TextUtils.isEmpty(AdminSettings.getInstance().getDeviceIdentifier())) {
+            AdminSettings.getInstance().setDeviceIdentifier(UUID.randomUUID().toString());
+        }
+        if (TextUtils.isEmpty(AdminSettings.getInstance().getDeviceLabel())) {
+            AdminSettings.getInstance().setDeviceLabel(getBuildName());
+        }
     }
 
     private static void requestNeededPermissions() {
@@ -114,8 +122,7 @@ public class AppUtil {
         ActiveRecordCloudSync.addReceiveTable("properties", Property.class);
         ActiveRecordCloudSync.addReceiveTable("relationship_types", RelationshipType.class);
         ActiveRecordCloudSync.addSendReceiveTable("participants", Participant.class);
-        ActiveRecordCloudSync.addSendReceiveTable("participant_properties", ParticipantProperty
-                .class);
+        ActiveRecordCloudSync.addSendReceiveTable("participant_properties", ParticipantProperty.class);
         ActiveRecordCloudSync.addSendReceiveTable("relationships", Relationship.class);
         ActiveRecordCloudSync.addSendTable("device_sync_entries", DeviceSyncEntry.class);
     }
@@ -206,4 +213,9 @@ public class AppUtil {
     public static Context getContext() {
         return mContext;
     }
+
+    public static String getBuildName() {
+        return Build.MODEL;
+    }
+
 }

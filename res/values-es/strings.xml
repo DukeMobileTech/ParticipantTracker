@@ -63,4 +63,7 @@
     <string name="re_check_for_updates">Recheck for updates after granting storage permission</string>
     <string name="reset_last_sync_time">Reset Last Sync Time</string>
     <string name="last_sync_time">Last Sync Time: </string>
+    <string name="device_settings">Device Settings</string>
+    <string name="api_endpoint_settings">Api Endpoint Settings</string>
+    <string name="admin_settings">Admin Settings</string>
 </resources>

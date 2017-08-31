@@ -10,13 +10,8 @@
         android:showAsAction="always"
         android:title="@string/refresh"/>
     <item
-        android:id="@+id/menu_item_settings"
+        android:id="@+id/menu_action_admin"
         android:icon="@drawable/ic_settings"
         android:showAsAction="ifRoom"
         android:title="@string/action_settings"/>
-    <item
-        android:id="@+id/menu_action_admin"
-        android:icon="@drawable/ic_menu_item_secure"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_admin"/>
 </menu>

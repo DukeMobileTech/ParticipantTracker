@@ -28,7 +28,7 @@
     <string name="api_version">Api Version</string>
     <string name="api_key">Api Key: </string>  
     <string name="last_update">Last update:  </string>
-    <string name="system_information">System Information</string>
+    <string name="system_information">App Information</string>
     <string name="version_code">Version Code: </string>
     <string name="version_name">Version Name: </string>
     <string name="participants_loading_header">Loading Participants</string>
@@ -63,4 +63,7 @@
     <string name="re_check_for_updates">Recheck for updates after granting storage permission</string>
     <string name="reset_last_sync_time">Reset Last Sync Time</string>
     <string name="last_sync_time">Last Sync Time: </string>
+    <string name="device_settings">Device Settings</string>
+    <string name="api_endpoint_settings">Api Endpoint Settings</string>
+    <string name="admin_settings">Admin Settings</string>
 </resources>

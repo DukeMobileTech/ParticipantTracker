@@ -1,156 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
-              android:orientation="vertical">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/survey_fragment_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:orientation="vertical"
+            android:fillViewport="true">
 
-    <ScrollView
-        android:id="@+id/survey_fragment_scroll_view"
+    <LinearLayout
+        android:id="@+id/linear_layout_for_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/linear_layout_for_scroll_view"
+        <TextView
+            android:id="@+id/api_endpoint_settings_label"
+            style="@style/sectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/api_endpoint_settings"/>
+
+        <TextView
+            android:id="@+id/api_endpoint_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/api_endpoint"/>
+
+        <EditText
+            android:id="@+id/api_endpoint_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:ems="10"
+            android:inputType="textUri"/>
 
-            <TextView
-                android:id="@+id/sync_settings_label"
-                style="@style/sectionHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sync_settings"/>
+        <TextView
+            android:id="@+id/api_version_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/api_version"/>
 
-            <TextView
-                android:id="@+id/device_identifier_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/device_identifier"/>
+        <EditText
+            android:id="@+id/api_version_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"/>
 
-            <EditText
-                android:id="@+id/device_identifier_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10">
+        <TextView
+            android:id="@+id/project_id_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/project_id"/>
 
-                <requestFocus/>
-            </EditText>
+        <EditText
+            android:id="@+id/project_id_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"/>
 
-            <TextView
-                android:id="@+id/device_label_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/device_label"/>
+        <TextView
+            android:id="@+id/api_key_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/api_key"/>
 
-            <EditText
-                android:id="@+id/device_label_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10">
-            </EditText>
+        <EditText
+            android:id="@+id/api_key_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"/>
 
-            <TextView
-                android:id="@+id/api_endpoint_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/api_endpoint"/>
+        <TextView
+            android:id="@+id/device_settings_label"
+            style="@style/sectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/device_settings"/>
 
-            <EditText
-                android:id="@+id/api_endpoint_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textUri"/>
+        <TextView
+            android:id="@+id/device_identifier_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/device_identifier"/>
 
-            <TextView
-                android:id="@+id/api_version_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/api_version"/>
+        <EditText
+            android:id="@+id/device_identifier_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textMultiLine">
 
-            <EditText
-                android:id="@+id/api_version_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="text"/>
+            <requestFocus/>
+        </EditText>
 
-            <TextView
-                android:id="@+id/project_id_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/project_id"/>
+        <TextView
+            android:id="@+id/device_label_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/device_label"/>
 
-            <EditText
-                android:id="@+id/project_id_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="number"/>
+        <EditText
+            android:id="@+id/device_label_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textMultiLine">
+        </EditText>
 
-            <TextView
-                android:id="@+id/api_key_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/api_key"/>
+        <TextView
+            android:id="@+id/sync_settings_label"
+            style="@style/sectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/sync_settings"/>
 
-            <EditText
-                android:id="@+id/api_key_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="text"/>
+        <TextView
+            android:id="@+id/last_update_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/system_info_label"
-                style="@style/sectionHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="@string/system_information"/>
+        <Button
+            android:id="@+id/reset_last_sync_time_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/login_background"
+            android:padding="10dp"
+            android:text="@string/reset_last_sync_time"
+            android:textColor="@android:color/white"/>
 
-            <TextView
-                android:id="@+id/last_update_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="@string/last_update"
-                android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/system_info_label"
+            style="@style/sectionHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/system_information"/>
 
-            <TextView
-                android:id="@+id/version_code_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                android:layout_marginTop="5dp"
-                android:text="@string/version_code"
-                android:textStyle="bold"
-                />
+        <TextView
+            android:id="@+id/version_code_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/version_code"
+            android:textStyle="bold"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom|center_horizontal"
-                android:orientation="horizontal">
+        <TextView
+            android:id="@+id/version_name_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textStyle="bold"/>
 
-                <Button
-                    android:id="@+id/save_admin_settings_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_marginTop="18dp"
-                    android:width="200dp"
-                    android:text="@string/save_button"/>
-
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+        <Button
+            android:id="@+id/updates_check_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/login_background"
+            android:padding="10dp"
+            android:text="@string/check_for_updates"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+</ScrollView>

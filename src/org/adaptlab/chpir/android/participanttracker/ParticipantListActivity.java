@@ -2,11 +2,9 @@ package org.adaptlab.chpir.android.participanttracker;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +14,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,12 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantType;
@@ -69,41 +64,15 @@ public class ParticipantListActivity extends FragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_action_admin:
-                displayPassWordPrompt();
+                Intent i = new Intent(ParticipantListActivity.this, AdminActivity.class);
+                startActivity(i);
                 return true;
             case R.id.menu_item_refresh:
                 authenticateUser();
                 return true;
-            case R.id.menu_item_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void displayPassWordPrompt() {
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.password_title)
-                .setMessage(R.string.password_message)
-                .setView(input)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int button) {
-                        if (AppUtil.checkAdminPassword(input.getText().toString())) {
-                            Intent i = new Intent(ParticipantListActivity.this, AdminActivity
-                                    .class);
-                            startActivity(i);
-                        } else {
-                            Toast.makeText(ParticipantListActivity.this, R.string
-                                    .incorrect_password, Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int button) {
-            }
-        }).show();
     }
 
     private void authenticateUser() {
