@@ -1,12 +1,17 @@
 package org.adaptlab.chpir.android.participanttracker;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
@@ -31,6 +36,7 @@ public class AppUtil {
     private final static boolean REQUIRE_SECURITY_CHECKS = !BuildConfig.DEBUG;
     private static final String TAG = "AppUtil";
     private static final boolean SEED_DB = false;
+    public static final int WRITE_EXTERNAL_STORAGE_CODE = 1;
     public static String ADMIN_PASSWORD_HASH;
     public static String ACCESS_TOKEN;
     private static Context mContext;
@@ -63,6 +69,17 @@ public class AppUtil {
         ActiveRecordCloudSync.setEndPoint(getAdminSettingsInstanceApiUrl());
         addDataTables();
         seedDb();
+        requestNeededPermissions();
+    }
+
+    private static void requestNeededPermissions() {
+        if (isPermissionNeeded((Activity) mContext)) {
+            ActivityCompat.requestPermissions((Activity) mContext,  new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE_CODE);
+        }
+    }
+
+    static boolean isPermissionNeeded(Activity context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED;
     }
 
     public static String getAdminSettingsInstanceApiUrl() {

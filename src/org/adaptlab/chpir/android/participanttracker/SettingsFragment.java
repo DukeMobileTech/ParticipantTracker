@@ -1,8 +1,11 @@
 package org.adaptlab.chpir.android.participanttracker;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,8 @@ import org.adaptlab.chpir.android.participanttracker.tasks.ApkUpdateTask;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+
+import static org.adaptlab.chpir.android.participanttracker.AppUtil.WRITE_EXTERNAL_STORAGE_CODE;
 
 public class SettingsFragment extends Fragment {
 
@@ -43,7 +48,11 @@ public class SettingsFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                new ApkUpdateTask(getActivity()).execute();
+                if (AppUtil.isPermissionNeeded(getActivity())) {
+                    ActivityCompat.requestPermissions(getActivity(),  new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE_CODE);
+                } else {
+                    new ApkUpdateTask(getActivity()).execute();
+                }
             }
         });
 
@@ -70,6 +79,19 @@ public class SettingsFragment extends Fragment {
         });
 
         return v;
+    }
+
+    /*
+    Called from the parent activity
+     */
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case WRITE_EXTERNAL_STORAGE_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new ApkUpdateTask(getActivity()).execute();
+                }
+            }
+        }
     }
 
 }
