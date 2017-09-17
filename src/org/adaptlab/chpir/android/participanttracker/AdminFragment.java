@@ -11,9 +11,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -45,7 +42,7 @@ public class AdminFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+//        setHasOptionsMenu(true);
         getActivity().setTitle(R.string.admin_settings);
     }
 
@@ -110,30 +107,40 @@ public class AdminFragment extends Fragment {
             }
         });
 
+       // TODO: 9/15/17  Change
+        Button saveSettingsButton = (Button) view.findViewById(R.id.save_admin_settings_button);
+        saveSettingsButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                saveAdminSettings();
+            }
+        });
+
         return view;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.admin_setting_menu, menu);
-    }
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        super.onCreateOptionsMenu(menu, inflater);
+//        inflater.inflate(R.menu.admin_setting_menu, menu);
+//    }
 
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-    }
+//    @Override
+//    public void onPrepareOptionsMenu(Menu menu) {
+//        super.onPrepareOptionsMenu(menu);
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.save_admin_settings_button:
-                saveAdminSettings();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.save_admin_settings_button:
+//                saveAdminSettings();
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//    }
 
     private void saveAdminSettings() {
         AdminSettings.getInstance().setDeviceIdentifier(mDeviceIdentifierEditText.getText().toString());
