@@ -31,19 +31,18 @@ import org.adaptlab.chpir.android.participanttracker.models.Relationship;
 import org.adaptlab.chpir.android.participanttracker.models.RelationshipType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NewParticipantFragment extends Fragment {
-    public final static String EXTRA_PARTICIPANT_TYPE_ID =
-            "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_type_id";
-    public final static String EXTRA_PARTICIPANT_ID =
-            "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_id";
+    public final static String EXTRA_PARTICIPANT_TYPE_ID = "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_type_id";
+    public final static String EXTRA_PARTICIPANT_ID = "org.adaptlab.chpir.participanttracker.newparticipantfragment.participant_id";
     private static final String TAG = "NewParticipantFragment";
     private ParticipantType mParticipantType;
     private Participant mParticipant;
     private HashMap<Long, View> mPropertyFields;
-    private HashMap<RelationshipType, Participant> mRelationshipFields;
-
+    private HashMap<RelationshipType, Set<Participant>> mRelationshipFields;
     private LinearLayout mParticipantPropertiesContainer;
 
     @Override
@@ -51,16 +50,14 @@ public class NewParticipantFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            mParticipantType = ParticipantType.findById(savedInstanceState.getLong
-                    (EXTRA_PARTICIPANT_TYPE_ID));
+            mParticipantType = ParticipantType.findById(savedInstanceState.getLong(EXTRA_PARTICIPANT_TYPE_ID));
         } else {
-            Long participantTypeId = getActivity().getIntent().getLongExtra
-                    (EXTRA_PARTICIPANT_TYPE_ID, -1);
+            Long participantTypeId = getActivity().getIntent().getLongExtra(EXTRA_PARTICIPANT_TYPE_ID, -1);
             if (participantTypeId == -1) return;
 
             mParticipantType = ParticipantType.findById(participantTypeId);
-            mPropertyFields = new HashMap<Long, View>();
-            mRelationshipFields = new HashMap<RelationshipType, Participant>();
+            mPropertyFields = new HashMap<>();
+            mRelationshipFields = new HashMap<>();
         }
 
         loadOrCreateParticipant();
@@ -71,8 +68,7 @@ public class NewParticipantFragment extends Fragment {
         setHasOptionsMenu(true);
         View v = inflater.inflate(R.layout.fragment_new_participant, parent, false);
 
-        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id
-                .new_participant_properties_container);
+        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id.new_participant_properties_container);
 
         for (Property property : mParticipantType.getProperties()) {
             attachLabelForProperty(property);
@@ -80,8 +76,17 @@ public class NewParticipantFragment extends Fragment {
             attachRequiredLabel(property);
         }
 
-        for (RelationshipType relationshipType : mParticipantType.getRelationshipTypes()) {
-            attachSelectRelationshipButton(relationshipType);
+        if (mParticipant.getId() != null) {
+            for (RelationshipType relationshipType : mParticipantType.getRelationshipTypes()) {
+                TextView textView = new TextView(getActivity());
+                textView.setTextAppearance(getActivity(), R.style.sectionHeader);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(0, 50, 0, 0);
+                textView.setLayoutParams(layoutParams);
+                mParticipantPropertiesContainer.addView(textView);
+                textView.setText(relationshipType.getLabel());
+                attachSelectRelationshipButton(relationshipType);
+            }
         }
 
         return v;
@@ -120,12 +125,14 @@ public class NewParticipantFragment extends Fragment {
         }
 
         for (RelationshipType relationshipType : mRelationshipFields.keySet()) {
-            Relationship relationship = mParticipant.getRelationshipByRelationshipType
-                    (relationshipType);
-            relationship.setParticipantOwner(mParticipant);
-            relationship.setParticipantRelated(mRelationshipFields.get(relationshipType));
-            relationship.setChanged(true);
-            relationship.save();
+            for (Participant participant : mRelationshipFields.get(relationshipType)) {
+                Relationship relationship = mParticipant.relationshipByTypeAndRelated(relationshipType, participant);
+                if (relationship == null) relationship = new Relationship(relationshipType);
+                relationship.setParticipantOwner(mParticipant);
+                relationship.setParticipantRelated(participant);
+                relationship.setChanged(true);
+                relationship.save();
+            }
         }
 
         getActivity().setResult(Activity.RESULT_OK);
@@ -135,8 +142,7 @@ public class NewParticipantFragment extends Fragment {
     private boolean isMissingRequiredValue() {
         boolean missingField = false;
         for (Property property : mParticipantType.getProperties()) {
-            if (property.getRequired() && getValueForProperty(property.getRemoteId()).trim()
-                    .equals("")) {
+            if (property.getRequired() && getValueForProperty(property.getRemoteId()).trim().equals("")) {
                 if (mPropertyFields.get(property.getRemoteId()) instanceof EditText) {
                     ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R
                             .string.required_field));
@@ -157,11 +163,7 @@ public class NewParticipantFragment extends Fragment {
                     ((EditText) mPropertyFields.get(property.getRemoteId())).setError(getString(R
                             .string.invalid_validator));
                 }
-
-                Toast.makeText(getActivity(),
-                        property.getLabel() + " " + getString(R.string.invalid_validator_toast),
-                        Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getActivity(), property.getLabel() + " " + getString(R.string.invalid_validator_toast), Toast.LENGTH_SHORT).show();
                 invalid = true;
             }
         }
@@ -198,8 +200,7 @@ public class NewParticipantFragment extends Fragment {
 
         if (property.getTypeOf() == Property.PropertyType.INTEGER) {
             propertyView = new EditText(getActivity());
-            ((EditText) propertyView).setInputType(InputType.TYPE_CLASS_NUMBER | InputType
-                    .TYPE_NUMBER_FLAG_SIGNED);
+            ((EditText) propertyView).setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
             ((EditText) propertyView).setText(propertyValue);
             attachValidator(property, (EditText) propertyView);
         } else if (property.getTypeOf() == Property.PropertyType.DATE) {
@@ -226,32 +227,43 @@ public class NewParticipantFragment extends Fragment {
     }
 
     private void attachSelectRelationshipButton(final RelationshipType relationshipType) {
-        TextView textView = new TextView(getActivity());
-        textView.setTextAppearance(getActivity(), R.style.sectionHeader);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(0, 50, 0, 0);
-        textView.setLayoutParams(layoutParams);
-        mParticipantPropertiesContainer.addView(textView);
-        textView.setText(relationshipType.getLabel());
-
-        final Button button = new Button(getActivity());
-
         if (mParticipant.hasRelationshipByRelationshipType(relationshipType)) {
-            Participant relatedParticipant = mParticipant.getRelationshipByRelationshipType
-                    (relationshipType).getParticipantRelated();
-            button.setText(relatedParticipant.getLabel());
-            mRelationshipFields.put(relationshipType, relatedParticipant);
-        } else {
-            button.setText("Select " + relationshipType.getRelatedParticipantType().getLabel());
-        }
-
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                displayRelationshipPicker(relationshipType, button);
+            Set<Participant> relatedParticipants = mParticipant.relatedParticipantsByType(relationshipType);
+            if (relatedParticipants == null) {
+                relatedParticipants = new HashSet<>();
             }
-        });
-        mParticipantPropertiesContainer.addView(button);
+            for (Relationship relationship : mParticipant.relationshipsByType(relationshipType)) {
+                Participant relatedParticipant = relationship.getParticipantRelated();
+                final Button button = new Button(getActivity());
+                button.setText(relatedParticipant.getLabel());
+                if (!relatedParticipants.contains(relatedParticipant)) {
+                    relatedParticipants.add(relatedParticipant);
+                }
+                button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        displayRelationshipPicker(relationshipType, button);
+                    }
+                });
+                mParticipantPropertiesContainer.addView(button);
+            }
+            mRelationshipFields.put(relationshipType, relatedParticipants);
+            addNewRelatedButton(relationshipType);
+        } else {
+            addNewRelatedButton(relationshipType);
+        }
+    }
+
+    private void addNewRelatedButton(final RelationshipType relationshipType) {
+        if (mParticipant.getId() != null) {
+            final Button button = new Button(getActivity());
+            button.setText("Select " + relationshipType.getRelatedParticipantType().getLabel());
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    displayRelationshipPicker(relationshipType, button);
+                }
+            });
+            mParticipantPropertiesContainer.addView(button);
+        }
     }
 
     private void attachValidator(final Property property, final EditText propertyView) {
@@ -277,26 +289,22 @@ public class NewParticipantFragment extends Fragment {
 
                 if (!property.getValidationCallable().validate(propertyView.getText().toString())) {
                     propertyView.setError(getString(R.string.invalid_validator));
-                    propertyView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode
-                            .SRC_ATOP);
+                    propertyView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
                 } else {
                     propertyView.setError(null);
-                    propertyView.getBackground().setColorFilter(Color.TRANSPARENT, PorterDuff
-                            .Mode.SRC_ATOP);
+                    propertyView.getBackground().setColorFilter(Color.TRANSPARENT, PorterDuff.Mode.SRC_ATOP);
                 }
             }
         });
     }
 
-    public void displayRelationshipPicker(final RelationshipType relationshipType, final Button
-            button) {
+    public void displayRelationshipPicker(final RelationshipType relationshipType, final Button button) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Choose " + relationshipType.getRelatedParticipantType().getLabel());
         final List<Participant> relationshipParticipants;
-        relationshipParticipants = Participant.getAllByParticipantType(relationshipType
-                .getRelatedParticipantType());
-        CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants
-                .size()];
+        relationshipParticipants = Participant.getAllByParticipantType(relationshipType.getRelatedParticipantType());
+        if (mRelationshipFields.get(relationshipType) != null) relationshipParticipants.removeAll(mRelationshipFields.get(relationshipType));
+        CharSequence[] relationshipParticipantLabels = new CharSequence[relationshipParticipants.size()];
 
         for (int i = 0; i < relationshipParticipants.size(); i++) {
             relationshipParticipantLabels[i] = relationshipParticipants.get(i).getLabel();
@@ -307,11 +315,15 @@ public class NewParticipantFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                int selectedPosition = ((AlertDialog) dialog).getListView()
-                        .getCheckedItemPosition();
+                int selectedPosition = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                 if (selectedPosition == -1) return;
-                mRelationshipFields.put(relationshipType, relationshipParticipants.get
-                        (selectedPosition));
+                Participant participant = relationshipParticipants.get(selectedPosition);
+                Set<Participant> relatedParticipants = mParticipant.relatedParticipantsByType(relationshipType);
+                if (relatedParticipants == null) {
+                    relatedParticipants = new HashSet<>();
+                }
+                if (!relatedParticipants.contains(participant)) relatedParticipants.add(participant);
+                mRelationshipFields.put(relationshipType, relatedParticipants);
                 button.setText(relationshipParticipants.get(selectedPosition).getLabel());
             }
         });
@@ -330,11 +342,11 @@ public class NewParticipantFragment extends Fragment {
         Long participantId = getActivity().getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
         if (participantId == -1) {
             mParticipant = new Participant(mParticipantType);
-            getActivity().setTitle(getString(R.string.new_participant_prefix) + mParticipantType
-                    .getLabel());
+            getActivity().setTitle(getString(R.string.new_participant_prefix) + mParticipantType.getLabel());
         } else {
             mParticipant = Participant.findById(participantId);
             getActivity().setTitle(mParticipant.getLabel());
         }
     }
+
 }

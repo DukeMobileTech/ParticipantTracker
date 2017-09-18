@@ -12,7 +12,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Table(name = "Participant")
@@ -22,8 +24,7 @@ public class Participant extends SendReceiveModel {
 
     @Column(name = "SentToRemote")
     private boolean mSent;
-    @Column(name = "ParticipantType", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete =
-            Column.ForeignKeyAction.CASCADE)
+    @Column(name = "ParticipantType", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
     private ParticipantType mParticipantType;
     @Column(name = "UUID")
     private String mUUID;
@@ -47,8 +48,7 @@ public class Participant extends SendReceiveModel {
         mSent = false;
     }
 
-    public static List<Participant> getAllByParticipantType(ParticipantType participantType,
-                                                            String query) {
+    public static List<Participant> getAllByParticipantType(ParticipantType participantType, String query) {
         return new Select("Participant.*")
                 .distinct()
                 .from(Participant.class)
@@ -158,7 +158,7 @@ public class Participant extends SendReceiveModel {
 
     @Override
     public boolean readyToSend() {
-        return true; //TODO: For Testing...FIX - also in ParticipantProperty
+        return true;
     }
 
     @Override
@@ -230,13 +230,11 @@ public class Participant extends SendReceiveModel {
                 return relationship;
             }
         }
-
         return new Relationship(relationshipType);
     }
 
     public List<Relationship> getRelationships() {
-        return new Select().from(Relationship.class).where("ParticpantOwner = ?", getId())
-                .orderBy("RelationshipType ASC").execute();
+        return new Select().from(Relationship.class).where("ParticpantOwner = ?", getId()).orderBy("RelationshipType ASC").execute();
     }
 
     public boolean hasRelationshipByRelationshipType(RelationshipType relationshipType) {
@@ -249,6 +247,39 @@ public class Participant extends SendReceiveModel {
         }
 
         return false;
+    }
+
+    public List<Relationship> relationshipsByType(RelationshipType relationshipType) {
+        List<Relationship> relationshipList = new ArrayList<>();
+        for (Relationship relationship : getRelationships()) {
+            if (relationship.getRelationshipType().equals(relationshipType)) {
+                relationshipList.add(relationship);
+            }
+        }
+        return relationshipList;
+    }
+
+    public Relationship relationshipByTypeAndRelated(RelationshipType relationshipType, Participant related) {
+        for (Relationship relationship : myRelationships()) {
+            if (relationship.getParticipantRelated().getUUID().equals(related.getUUID()) && relationship.getRelationshipType().getRemoteId().equals(relationshipType.getRemoteId())) {
+                return relationship;
+            }
+        }
+        return null;
+    }
+
+    private List<Relationship> myRelationships() {
+        return new Select().from(Relationship.class).where("ParticpantOwner = ?", getId()).execute();
+    }
+
+    public Set<Participant> relatedParticipantsByType(RelationshipType relationshipType) {
+        Set<Participant> list = new HashSet<>();
+        for (Relationship relationship : getRelationships()) {
+            if (relationship.getRelationshipType().equals(relationshipType)) {
+                list.add(relationship.getParticipantRelated());
+            }
+        }
+        return list;
     }
 
     public List<Property> getProperties() {
@@ -273,8 +304,7 @@ public class Participant extends SendReceiveModel {
     }
 
     public List<ParticipantProperty> getParticipantProperties() {
-        return new Select().from(ParticipantProperty.class).where("Participant = ?", getId())
-                .execute();
+        return new Select().from(ParticipantProperty.class).where("Participant = ?", getId()).execute();
     }
 
     @Override
@@ -332,8 +362,7 @@ public class Participant extends SendReceiveModel {
 
     @Override
     public boolean belongsToCurrentProject() {
-        return AdminSettings.getInstance().getProjectId() != null &&
-                mProjectId.equals(AdminSettings.getInstance().getProjectId());
+        return AdminSettings.getInstance().getProjectId() != null && mProjectId.equals(AdminSettings.getInstance().getProjectId());
     }
 
     public void setChanged(boolean changed) {
@@ -347,8 +376,7 @@ public class Participant extends SendReceiveModel {
         jsonObject.put("participant_type", getParticipantType().getLabel());
 
         for (ParticipantProperty participantProperty : getMetadataParticipantProperties(this)) {
-            jsonObject.put(participantProperty.getProperty().getLabel(), participantProperty
-                    .getValue());
+            jsonObject.put(participantProperty.getProperty().getLabel(), participantProperty.getValue());
         }
 
         // Add metadata for relationships

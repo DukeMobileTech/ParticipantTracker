@@ -22,12 +22,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.adaptlab.chpir.android.participanttracker.receivers.InstrumentListReceiver;
-import org.adaptlab.chpir.android.participanttracker.receivers.ReceivedInstrumentDetails;
 import org.adaptlab.chpir.android.participanttracker.models.Participant;
 import org.adaptlab.chpir.android.participanttracker.models.ParticipantProperty;
 import org.adaptlab.chpir.android.participanttracker.models.Property;
 import org.adaptlab.chpir.android.participanttracker.models.Relationship;
+import org.adaptlab.chpir.android.participanttracker.models.RelationshipType;
+import org.adaptlab.chpir.android.participanttracker.receivers.InstrumentListReceiver;
+import org.adaptlab.chpir.android.participanttracker.receivers.ReceivedInstrumentDetails;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -59,8 +60,7 @@ public class ParticipantDetailFragment extends Fragment {
     private Map<ParticipantProperty, TextView> mParticipantPropertyLabels;
     private Map<Relationship, Button> mRelationshipButtons;
 
-    public static void displayInstrumentPicker(final List<ReceivedInstrumentDetails>
-                                                       instrumentDetails) {
+    public static void displayInstrumentPicker(final List<ReceivedInstrumentDetails> instrumentDetails) {
         AlertDialog.Builder builder = new AlertDialog.Builder(sActivity);
         builder.setTitle(sActivity.getString(R.string.choose_instrument));
 
@@ -73,14 +73,12 @@ public class ParticipantDetailFragment extends Fragment {
             String startAge = d.getParticipantStartAge();
             String endAge = d.getParticipantEndAge();
             if (!TextUtils.isEmpty(startAge) && !TextUtils.isEmpty(endAge)) {
-                if (!(participantAge >= Integer.parseInt(startAge) && participantAge < Integer
-                        .parseInt(endAge))) {
+                if (!(participantAge >= Integer.parseInt(startAge) && participantAge < Integer.parseInt(endAge))) {
                     if (BuildConfig.DEBUG) Log.i(TAG, d.getTitle() + " Fails Age Rule");
                     continue;
                 }
             }
-            if (!d.getParticipantType().equals("") && !d.getParticipantType().equals
-                    (sParticipantType))
+            if (!d.getParticipantType().equals("") && !d.getParticipantType().equals(sParticipantType))
                 continue;
             instrumentTitleList.add(d.getTitle());
             instrumentIdList.add(d.getId());
@@ -174,8 +172,7 @@ public class ParticipantDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         View v = inflater.inflate(R.layout.fragment_participant_detail, parent, false);
-        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id
-                .participant_properties_container);
+        mParticipantPropertiesContainer = (LinearLayout) v.findViewById(R.id.participant_properties_container);
         refreshView();
         return v;
     }
@@ -201,8 +198,7 @@ public class ParticipantDetailFragment extends Fragment {
             case R.id.action_edit_participant:
                 Intent i = new Intent(getActivity(), NewParticipantActivity.class);
                 i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_ID, mParticipant.getId());
-                i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID, mParticipant
-                        .getParticipantType().getId());
+                i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID, mParticipant.getParticipantType().getId());
                 startActivityForResult(i, UPDATE_PARTICIPANT);
                 return true;
             default:
@@ -254,27 +250,26 @@ public class ParticipantDetailFragment extends Fragment {
 
                 addKeyValueLabel(getString(R.string.age), ageString);
             } else {
-                mParticipantPropertyLabels.put(participantProperty,
-                        addKeyValueLabel(participantProperty.getProperty().getLabel(),
-                                participantProperty.getValue()));
+                mParticipantPropertyLabels.put(participantProperty, addKeyValueLabel(participantProperty.getProperty().getLabel(), participantProperty.getValue()));
             }
         }
 
-        for (final Relationship relationship : mParticipant.getRelationships()) {
-            addHeader(relationship.getRelationshipType().getLabel());
+        for (RelationshipType relationshipType : mParticipant.getParticipantType().getRelationshipTypes()) {
+            addHeader(relationshipType.getLabel());
+            for (final Relationship relationship : mParticipant.getRelationships()) {
+                Button button = new Button(getActivity());
+                button.setText(relationship.getParticipantRelated().getLabel());
+                button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent i = new Intent(getActivity(), ParticipantDetailActivity.class);
+                        i.putExtra(ParticipantDetailFragment.EXTRA_PARTICIPANT_ID, relationship.getParticipantRelated().getId());
 
-            Button button = new Button(getActivity());
-            button.setText(relationship.getParticipantRelated().getLabel());
-            button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent i = new Intent(getActivity(), ParticipantDetailActivity.class);
-                    i.putExtra(ParticipantDetailFragment.EXTRA_PARTICIPANT_ID, relationship
-                            .getParticipantRelated().getId());
-                    startActivity(i);
-                }
-            });
-            mParticipantPropertiesContainer.addView(button);
-            mRelationshipButtons.put(relationship, button);
+                        startActivity(i);
+                    }
+                });
+                mParticipantPropertiesContainer.addView(button);
+                mRelationshipButtons.put(relationship, button);
+            }
         }
 
         addKeyValueLabel("UUID", mParticipant.getUUID());
