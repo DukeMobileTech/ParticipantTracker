@@ -38,8 +38,7 @@ public class AdminSettings extends Model {
     }
 
     public static AdminSettings getInstance() {
-        AdminSettings adminSettings = new Select().from(AdminSettings.class).orderBy("Id asc")
-                .executeSingle();
+        AdminSettings adminSettings = new Select().from(AdminSettings.class).orderBy("Id asc").executeSingle();
         if (adminSettings == null) {
             if (BuildConfig.DEBUG) Log.i(TAG, "Creating new admin settings instance");
             adminSettings = new AdminSettings();

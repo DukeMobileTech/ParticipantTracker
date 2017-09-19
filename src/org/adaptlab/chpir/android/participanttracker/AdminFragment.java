@@ -71,7 +71,7 @@ public class AdminFragment extends Fragment {
         mProjectIdEditText.setText(getAdminSettingsInstanceProjectId());
         if (!TextUtils.isEmpty(getAdminSettingsInstanceProjectId())) setOnClickListener(mProjectIdEditText);
 
-        mTransformableFields = new ArrayList<>(Arrays.asList(mApiEndPointEditText, mApiVersionEditText, mProjectIdEditText, mApiKeyEditText, mProjectIdEditText));
+        mTransformableFields = new ArrayList<>(Arrays.asList(mApiEndPointEditText, mApiVersionEditText, mProjectIdEditText, mApiKeyEditText));
 
         final TextView lastUpdateTextView = (TextView) view.findViewById(R.id.last_update_label);
         lastUpdateTextView.setText(String.format(Locale.getDefault(), "%s%s%s", getString(R.string.last_update), " ", getLastSyncTime()));
@@ -143,17 +143,29 @@ public class AdminFragment extends Fragment {
 //    }
 
     private void saveAdminSettings() {
-        AdminSettings.getInstance().setDeviceIdentifier(mDeviceIdentifierEditText.getText().toString());
-        AdminSettings.getInstance().setApiUrl(setApiUrl(mApiEndPointEditText.getText().toString()));
-        AdminSettings.getInstance().setApiVersion(mApiVersionEditText.getText().toString());
-        if (!TextUtils.isEmpty(mProjectIdEditText.getText().toString())) {
-            AdminSettings.getInstance().setProjectId(Long.parseLong(mProjectIdEditText.getText().toString()));
+        if (!requiredFieldIsEmpty()) {
+            AdminSettings.getInstance().setDeviceIdentifier(mDeviceIdentifierEditText.getText().toString());
+            AdminSettings.getInstance().setApiUrl(setApiUrl(mApiEndPointEditText.getText().toString()));
+            AdminSettings.getInstance().setApiVersion(mApiVersionEditText.getText().toString());
+            if (!TextUtils.isEmpty(mProjectIdEditText.getText().toString())) {
+                AdminSettings.getInstance().setProjectId(Long.parseLong(mProjectIdEditText.getText().toString()));
+            }
+            AdminSettings.getInstance().setApiKey(mApiKeyEditText.getText().toString());
+            AdminSettings.getInstance().setDeviceLabel(mDeviceLabelEditText.getText().toString());
+            ActiveRecordCloudSync.setAccessToken(getAdminSettingsInstanceApiKey());
+            ActiveRecordCloudSync.setEndPoint(getAdminSettingsInstanceApiUrl());
+            getActivity().finish();
         }
-        AdminSettings.getInstance().setApiKey(mApiKeyEditText.getText().toString());
-        AdminSettings.getInstance().setDeviceLabel(mDeviceLabelEditText.getText().toString());
-        ActiveRecordCloudSync.setAccessToken(getAdminSettingsInstanceApiKey());
-        ActiveRecordCloudSync.setEndPoint(getAdminSettingsInstanceApiUrl());
-        getActivity().finish();
+    }
+
+    private boolean requiredFieldIsEmpty() {
+        for (EditText editText : mTransformableFields) {
+            if (TextUtils.isEmpty(editText.getText())) {
+                editText.setError(getString(R.string.required_field));
+                return true;
+            }
+        }
+        return false;
     }
 
     private String setApiUrl(String string) {
