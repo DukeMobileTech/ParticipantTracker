@@ -78,11 +78,13 @@ public class LoginFragment extends Fragment {
             if (ActiveRecordCloudSync.getAuthToken() != null) {
                 new SyncTablesTask(getActivity()).execute();
             } else {
-                new AlertDialog.Builder(getActivity())
-                        .setMessage(R.string.email_password_mismatch)
-                        .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int button) {}
-                        }).show();
+                if (getActivity() != null) {
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.email_password_mismatch)
+                            .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int button) {}
+                    }).show();
+                }
             }
         }
     }

@@ -238,8 +238,7 @@ public class AdminFragment extends Fragment {
                                 editText.setClickable(false);
                             }
                         } else {
-                            Toast.makeText(getActivity(), R.string.incorrect_password, Toast
-                                    .LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), R.string.incorrect_password, Toast.LENGTH_LONG).show();
                         }
                     }
                 }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
