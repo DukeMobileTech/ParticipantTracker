@@ -104,8 +104,7 @@ public class ParticipantListActivity extends FragmentActivity implements
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(
-                getSupportFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -114,13 +113,12 @@ public class ParticipantListActivity extends FragmentActivity implements
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
         // a reference to the Tab.
-        mViewPager
-                .setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        mActionBar.setSelectedNavigationItem(position);
-                    }
-                });
+        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                mActionBar.setSelectedNavigationItem(position);
+            }
+        });
 
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
@@ -128,37 +126,30 @@ public class ParticipantListActivity extends FragmentActivity implements
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
-            mActionBar.addTab(mActionBar.newTab()
-                    .setText(mSectionsPagerAdapter.getPageTitle(i))
-                    .setTabListener(this));
+            mActionBar.addTab(mActionBar.newTab().setText(mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
         }
     }
 
     private void refreshSectionTabs() {
         mActionBar.removeAllTabs();
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            mActionBar.addTab(mActionBar.newTab()
-                    .setText(mSectionsPagerAdapter.getPageTitle(i))
-                    .setTabListener(this));
+            mActionBar.addTab(mActionBar.newTab().setText(mSectionsPagerAdapter.getPageTitle(i)).setTabListener(this));
         }
     }
 
     @Override
-    public void onTabSelected(ActionBar.Tab tab,
-                              FragmentTransaction fragmentTransaction) {
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
         mViewPager.setCurrentItem(tab.getPosition());
     }
 
     @Override
-    public void onTabUnselected(ActionBar.Tab tab,
-                                FragmentTransaction fragmentTransaction) {
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
     @Override
-    public void onTabReselected(ActionBar.Tab tab,
-                                FragmentTransaction fragmentTransaction) {
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
     public static class ParticipantListFragment extends ListFragment {
@@ -196,19 +187,15 @@ public class ParticipantListActivity extends FragmentActivity implements
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-                savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_participant_list_dummy, container,
-                    false);
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_participant_list_dummy, container, false);
 
             mNewParticipantButton = (Button) rootView.findViewById(R.id.new_participant_button);
-            mNewParticipantButton.setText(getString(R.string.new_participant_prefix) +
-                    getParticipantType().getLabel());
+            mNewParticipantButton.setText(getString(R.string.new_participant_prefix) + getParticipantType().getLabel());
             mNewParticipantButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), NewParticipantActivity.class);
-                    i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID,
-                            getParticipantType().getId());
+                    i.putExtra(NewParticipantFragment.EXTRA_PARTICIPANT_TYPE_ID, getParticipantType().getId());
                     startActivityForResult(i, CREATE_NEW_PARTICIPANT);
                 }
             });
@@ -255,12 +242,9 @@ public class ParticipantListActivity extends FragmentActivity implements
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                SearchManager searchManager = (SearchManager) getActivity().getSystemService
-                        (Context.SEARCH_SERVICE);
-                SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
-                        .getActionView();
-                searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity()
-                        .getComponentName()));
+                SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+                SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
                 searchView.setIconifiedByDefault(true);
                 searchView.setOnQueryTextListener(queryListener);
             }

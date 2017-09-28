@@ -115,6 +115,7 @@ public class NewParticipantFragment extends Fragment {
         }
         mParticipant.setChanged(true);
         mParticipant.setProjectId(AdminSettings.getInstance().getProjectId());
+        mParticipant.setActive(true);
         mParticipant.save();
 
         for (Property property : mParticipantType.getProperties()) {

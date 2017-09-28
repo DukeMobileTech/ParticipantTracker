@@ -34,6 +34,8 @@ public class Participant extends SendReceiveModel {
     private boolean mChanged;
     @Column(name = "ProjectId")
     private Long mProjectId;
+    @Column(name = "Active")
+    private boolean mActive;
 
     public Participant() {
         super();
@@ -53,10 +55,7 @@ public class Participant extends SendReceiveModel {
                 .distinct()
                 .from(Participant.class)
                 .innerJoin(ParticipantProperty.class)
-                .on("Participant.Id = ParticipantProperty.Participant AND Participant" +
-                                ".ParticipantType = ? AND Participant.ProjectId = ? AND " +
-                        "ParticipantProperty.Value LIKE ?", participantType.getId(),
-                        getCurrentProjectId(), "%" + query + "%")
+                .on("Participant.Id = ParticipantProperty.Participant AND Participant.ParticipantType = ? AND Participant.ProjectId = ? AND Participant.Active = ? AND ParticipantProperty.Value LIKE ?", participantType.getId(), getCurrentProjectId(), 1, "%" + query + "%")
                 .orderBy("Participant.Id DESC")
                 .execute();
     }
@@ -81,8 +80,7 @@ public class Participant extends SendReceiveModel {
     public static List<Participant> getAllByParticipantType(ParticipantType participantType) {
         Property sortingProperty = new Select()
                 .from(Property.class)
-                .where("Property.ParticipantType = ? AND Property.UseToSort = ?", participantType
-                        .getId(), 1)
+                .where("Property.ParticipantType = ? AND Property.UseToSort = ?", participantType.getId(), 1)
                 .executeSingle();
         if (sortingProperty != null) {
             return new Select("Participant.*")
@@ -90,15 +88,13 @@ public class Participant extends SendReceiveModel {
                     .from(Participant.class)
                     .innerJoin(ParticipantProperty.class)
                     .on("Participant.Id = ParticipantProperty.Participant AND ParticipantProperty" +
-                            ".Property = ? AND Participant.ProjectId = ?", sortingProperty.getId(),
-                            getCurrentProjectId())
+                            ".Property = ? AND Participant.ProjectId = ? AND Participant.Active = ?", sortingProperty.getId(), getCurrentProjectId(), 1)
                     .orderBy("ParticipantProperty.Value")
                     .execute();
         } else {
             return new Select()
                     .from(Participant.class)
-                    .where("ParticipantType = ? AND ProjectId = ?", participantType.getId(),
-                            getCurrentProjectId())
+                    .where("ParticipantType = ? AND ProjectId = ? AND Active = ?", participantType.getId(), getCurrentProjectId(), 1)
                     .orderBy("Id DESC")
                     .execute();
         }
@@ -122,6 +118,7 @@ public class Participant extends SendReceiveModel {
             jsonObject.put("participant_type_id", getParticipantType().getRemoteId());
             jsonObject.put("uuid", getUUID());
             jsonObject.put("project_id", AdminSettings.getInstance().getProjectId());
+            jsonObject.put("active", getActive());
             // TODO: 3/12/17 Delete participants that have been deleted remotely
             if (this.getRemoteId() == null) {
                 jsonObject.put("device_uuid", AdminSettings.getInstance().getDeviceIdentifier());
@@ -320,6 +317,7 @@ public class Participant extends SendReceiveModel {
             participant.setRemoteId(remoteId);
             Long projectId = jsonObject.getLong("project_id");
             participant.setProjectId(projectId);
+            participant.setActive(jsonObject.getBoolean("active"));
             Long participantTypeId = jsonObject.getLong("participant_type_id");
             ParticipantType participantType = ParticipantType.findByRemoteId(participantTypeId);
             if (participantType != null) {
@@ -349,6 +347,14 @@ public class Participant extends SendReceiveModel {
             if (BuildConfig.DEBUG) Log.e(TAG, "Error parsing object json", je);
         }
 
+    }
+
+    public void setActive(boolean active) {
+        mActive = active;
+    }
+
+    private boolean getActive() {
+        return mActive;
     }
 
     public static Participant findByUUID(String uuid) {
