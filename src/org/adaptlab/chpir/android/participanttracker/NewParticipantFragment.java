@@ -60,6 +60,8 @@ public class NewParticipantFragment extends Fragment {
             mRelationshipFields = new HashMap<>();
         }
 
+        if (mParticipantType == null) return;
+
         loadOrCreateParticipant();
     }
 

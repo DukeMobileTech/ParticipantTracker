@@ -368,7 +368,7 @@ public class Participant extends SendReceiveModel {
 
     @Override
     public boolean belongsToCurrentProject() {
-        return AdminSettings.getInstance().getProjectId() != null && mProjectId.equals(AdminSettings.getInstance().getProjectId());
+        return AdminSettings.getInstance().getProjectId() != null && mProjectId != null && mProjectId.equals(AdminSettings.getInstance().getProjectId());
     }
 
     public void setChanged(boolean changed) {
