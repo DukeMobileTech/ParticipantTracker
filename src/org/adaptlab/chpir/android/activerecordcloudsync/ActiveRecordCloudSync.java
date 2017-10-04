@@ -39,13 +39,11 @@ public class ActiveRecordCloudSync {
      * @param tableName
      * @param receiveTable
      */
-    public static void addReceiveTable(String tableName, Class<? extends ReceiveModel>
-            receiveTable) {
+    public static void addReceiveTable(String tableName, Class<? extends ReceiveModel> receiveTable) {
         mReceiveTables.put(tableName, receiveTable);
     }
 
-    public static void addSendReceiveTable(String tableName, Class<? extends SendReceiveModel>
-            sendTable) {
+    public static void addSendReceiveTable(String tableName, Class<? extends SendReceiveModel> sendTable) {
         mSendReceiveTables.put(tableName, sendTable);
     }
 

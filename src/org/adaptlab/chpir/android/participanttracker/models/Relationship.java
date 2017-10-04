@@ -61,21 +61,29 @@ public class Relationship extends SendReceiveModel {
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-
         try {
-            JSONObject jsonObject = new JSONObject();
-            if (getParticipantOwner() != null)
-                jsonObject.put("participant_owner_uuid", getParticipantOwner().getUUID());
-            if (getParticipantRelated() != null)
-                jsonObject.put("participant_related_uuid", getParticipantRelated().getUUID());
-            jsonObject.put("relationship_type_id", getRelationshipType().getRemoteId());
-            jsonObject.put("uuid", getUUID());
-
-            json.put("relationship", jsonObject);
+            json.put("relationship", asJsonObject());
         } catch (JSONException je) {
             if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
         return json;
+    }
+
+    @Override
+    public JSONObject asJsonObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if (getParticipantOwner() != null) jsonObject.put("participant_owner_uuid", getParticipantOwner().getUUID());
+            if (getParticipantRelated() != null) jsonObject.put("participant_related_uuid", getParticipantRelated().getUUID());
+            jsonObject.put("relationship_type_id", getRelationshipType().getRemoteId());
+            jsonObject.put("uuid", getUUID());
+            if (getRemoteId() != null) {
+                jsonObject.put("id", this.getRemoteId());
+            }
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        return jsonObject;
     }
 
     @Override

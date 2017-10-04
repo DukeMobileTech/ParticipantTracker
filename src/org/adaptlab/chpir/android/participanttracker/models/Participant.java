@@ -111,9 +111,18 @@ public class Participant extends SendReceiveModel {
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-
         try {
-            JSONObject jsonObject = new JSONObject();
+            json.put("participant", asJsonObject());
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        return json;
+    }
+
+    @Override
+    public JSONObject asJsonObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
             // TODO: Change to participant id
             jsonObject.put("participant_type_id", getParticipantType().getRemoteId());
             jsonObject.put("uuid", getUUID());
@@ -123,13 +132,13 @@ public class Participant extends SendReceiveModel {
             if (this.getRemoteId() == null) {
                 jsonObject.put("device_uuid", AdminSettings.getInstance().getDeviceIdentifier());
                 jsonObject.put("device_label", AdminSettings.getInstance().getDeviceLabel());
+            } else {
+                jsonObject.put("id", this.getRemoteId());
             }
-
-            json.put("participant", jsonObject);
         } catch (JSONException je) {
             if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
-        return json;
+        return jsonObject;
     }
 
     public ParticipantType getParticipantType() {
@@ -332,8 +341,7 @@ public class Participant extends SendReceiveModel {
                 if (BuildConfig.DEBUG) Log.i(TAG, "deleted participant: " + jsonObject.toString());
                 Participant p = Participant.findByUUID(uuid);
                 if (p != null) {
-                    List<ParticipantProperty> properties = ParticipantProperty
-                            .getAllByParticipant(p);
+                    List<ParticipantProperty> properties = ParticipantProperty.getAllByParticipant(p);
                     List<Relationship> relationships = Relationship.getAllByParticipant(p);
                     for (ParticipantProperty property : properties) {
                         property.delete();
@@ -347,7 +355,6 @@ public class Participant extends SendReceiveModel {
         } catch (JSONException je) {
             if (BuildConfig.DEBUG) Log.e(TAG, "Error parsing object json", je);
         }
-
     }
 
     public void setActive(boolean active) {
@@ -401,8 +408,7 @@ public class Participant extends SendReceiveModel {
         //Add Survey label
         for (Property property : this.getProperties()) {
             if (property.getUseAsLabel() && this.hasParticipantProperty(property)) {
-                jsonObject.put("survey_label", this.getParticipantType().getLabel() + " " + this
-                        .getParticipantProperty(property).getValue());
+                jsonObject.put("survey_label", this.getParticipantType().getLabel() + " " + this.getParticipantProperty(property).getValue());
             }
         }
 

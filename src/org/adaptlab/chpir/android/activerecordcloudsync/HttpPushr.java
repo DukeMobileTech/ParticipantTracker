@@ -16,13 +16,22 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class HttpPushr {
     private static final String TAG = "HttpPushr";
+    private static final int TIMEOUT = 100000;
     private Class<? extends SendModel> mSendTableClass;
     private String mRemoteTableName;
 
@@ -41,13 +50,19 @@ public class HttpPushr {
 
         try {
             if (isPersistent()) {
+                List<SendReceiveModel> postElements = new ArrayList<>();
+                List<SendReceiveModel> putElements = new ArrayList<>();
                 for (SendReceiveModel element : allElements) {
-                    if (element.isChanged() && element.belongsToCurrentProject()) {
-                        sendData(element);
-                    } else if (!element.isSent() && element.readyToSend()) {
-                        sendData(element);
+                    if ((element.isChanged() && element.belongsToCurrentProject()) || (!element.isSent() && element.readyToSend())) {
+                        if (element.getRemoteId() == null) {
+                            postElements.add(element);
+                        } else {
+                            putElements.add(element);
+                        }
                     }
                 }
+                sendJsonData("POST", postElements);
+                sendJsonData("PUT", putElements);
             } else {
                 SendModel element = mSendTableClass.newInstance();
                 if (!element.isSent() && element.readyToSend()) {
@@ -61,7 +76,7 @@ public class HttpPushr {
         }
     }
 
-    public List<? extends SendReceiveModel> getElements() {
+    private List<? extends SendReceiveModel> getElements() {
         return new Select().from(mSendTableClass).orderBy("Id ASC").execute();
     }
 
@@ -70,7 +85,62 @@ public class HttpPushr {
         return sendModel.isPersistent();
     }
 
-    public void sendData(SendModel element) {
+    // TODO: 10/4/17 Separate out roster elements
+    private void sendJsonData(String method, List<SendReceiveModel> jsonData) {
+        if (jsonData.size() == 0) return;
+        HttpURLConnection connection = null;
+        String endPoint = "";
+        if (method.equals("POST")) {
+            endPoint = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName + "/batch_create" + ActiveRecordCloudSync.getParams();
+        } else if (method.equals("PUT")) {
+            endPoint = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName + "/batch_update" + ActiveRecordCloudSync.getParams();
+        }
+        if (endPoint.equals("")) return;
+        if (BuildConfig.DEBUG) Log.i(TAG, "Batch EndPoint: " + endPoint);
+        JSONArray json = new JSONArray();
+        for (SendReceiveModel element : jsonData) {
+            json.put(element.asJsonObject());
+        }
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(mRemoteTableName, json);
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        try {
+            connection = (HttpURLConnection) new URL(endPoint).openConnection();
+            connection.setRequestMethod(method);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(TIMEOUT);
+            connection.setReadTimeout(TIMEOUT);
+            connection.setDoOutput(true);
+
+            byte[] outputInBytes = jsonObject.toString().getBytes(CharEncoding.UTF_8);
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(outputInBytes);
+            outputStream.close();
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode >= 200 && responseCode < 300) {
+                if (BuildConfig.DEBUG) Log.i(TAG, "Received OK HTTP code for data sent to " + mRemoteTableName);
+                for (SendReceiveModel element : jsonData) {
+                    element.setAsSent();
+                }
+            } else {
+                if (BuildConfig.DEBUG) Log.e(TAG, "Received BAD HTTP code " + responseCode + " for data sent to " + mRemoteTableName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+    }
+
+    private void sendData(SendModel element) {
         HttpClient client = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); // Timeout limit
 

@@ -20,8 +20,7 @@ public class SendReceiveFetchr {
     private Class<? extends SendReceiveModel> mReceiveTableClass;
     private String mRemoteTableName;
 
-    public SendReceiveFetchr(String remoteTableName, Class<? extends SendReceiveModel>
-            receiveTableClass) {
+    public SendReceiveFetchr(String remoteTableName, Class<? extends SendReceiveModel> receiveTableClass) {
         mReceiveTableClass = receiveTableClass;
         mRemoteTableName = remoteTableName;
     }
@@ -33,11 +32,9 @@ public class SendReceiveFetchr {
         }
 
         try {
-            String url = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName
-                    + ActiveRecordCloudSync.getParams();
+            String url = ActiveRecordCloudSync.getEndPoint() + mRemoteTableName + ActiveRecordCloudSync.getParams();
             if (BuildConfig.DEBUG) Log.i(TAG, "Attempting to access " + url);
             String jsonString = getUrl(url);
-            if (BuildConfig.DEBUG) Log.i(TAG, "Got JSON String: " + jsonString);
             JSONArray jsonArray = new JSONArray(jsonString);
             if (BuildConfig.DEBUG) Log.i(TAG, "Received json result: " + jsonArray);
 
@@ -67,7 +64,7 @@ public class SendReceiveFetchr {
         }
     }
 
-    public String getUrl(String urlSpec) throws IOException {
+    private String getUrl(String urlSpec) throws IOException {
         return new String(getUrlBytes(urlSpec));
     }
 

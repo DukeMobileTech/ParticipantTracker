@@ -20,11 +20,9 @@ public class ParticipantProperty extends SendReceiveModel {
 
     @Column(name = "SentToRemote")
     private boolean mSent;
-    @Column(name = "Participant", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column
-            .ForeignKeyAction.CASCADE)
+    @Column(name = "Participant", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
     private Participant mParticipant;
-    @Column(name = "Property", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column
-            .ForeignKeyAction.CASCADE)
+    @Column(name = "Property", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
     private Property mProperty;
     @Column(name = "Value")
     private String mValue;
@@ -63,21 +61,29 @@ public class ParticipantProperty extends SendReceiveModel {
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-
         try {
-            JSONObject jsonObject = new JSONObject();
-            if (getParticipant() != null)
-                jsonObject.put("participant_uuid", getParticipant().getUUID());
-            if (getProperty() != null)
-                jsonObject.put("property_id", getProperty().getRemoteId());
-            jsonObject.put("value", getValue());
-            jsonObject.put("uuid", getUUID());
-
-            json.put("participant_property", jsonObject);
+            json.put("participant_property", asJsonObject());
         } catch (JSONException je) {
             if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
         }
         return json;
+    }
+
+    @Override
+    public JSONObject asJsonObject() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if (getParticipant() != null) jsonObject.put("participant_uuid", getParticipant().getUUID());
+            if (getProperty() != null) jsonObject.put("property_id", getProperty().getRemoteId());
+            jsonObject.put("value", getValue());
+            jsonObject.put("uuid", getUUID());
+            if (getRemoteId() != null) {
+                jsonObject.put("id", this.getRemoteId());
+            }
+        } catch (JSONException je) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "JSON exception", je);
+        }
+        return jsonObject;
     }
 
     @Override
