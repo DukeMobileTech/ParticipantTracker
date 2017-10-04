@@ -91,6 +91,7 @@ public class Relationship extends SendReceiveModel {
     @Override
     public void setAsSent() {
         mSent = true;
+        mChanged = false;
         save();
     }
 

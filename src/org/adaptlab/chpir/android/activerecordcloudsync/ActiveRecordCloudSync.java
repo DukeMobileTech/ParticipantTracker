@@ -55,43 +55,39 @@ public class ActiveRecordCloudSync {
 
     public static void syncTables(Context context) {
 
-        NetworkNotificationUtils.showNotification(context, android.R.drawable.stat_sys_download,
-                R.string.sync_notification_text);
+        NetworkNotificationUtils.showNotification(context, android.R.drawable.stat_sys_download, R.string.sync_notification_text);
         Date currentTime = new Date();
         ActiveRecordCloudSync.setLastSyncTime(Long.toString(currentTime.getTime()));
         
-        for (Map.Entry<String, Class<? extends SendReceiveModel>> entry : mSendReceiveTables
-                .entrySet()) {
+        for (Map.Entry<String, Class<? extends SendReceiveModel>> entry : mSendReceiveTables.entrySet()) {
             if (BuildConfig.DEBUG)
-                Log.i(TAG, "Syncing " + entry.getValue() + " to remote table " + entry.getKey());
+                Log.i(TAG, "Syncing SendReceiveTable " + entry.getValue() + " to remote table " + entry.getKey());
             HttpPushr httpPushr = new HttpPushr(entry.getKey(), entry.getValue());
             httpPushr.push();
         }
 
         for (Map.Entry<String, Class<? extends ReceiveModel>> entry : mReceiveTables.entrySet()) {
             if (BuildConfig.DEBUG)
-                Log.i(TAG, "Syncing " + entry.getValue() + " from remote table " + entry.getKey());
+                Log.i(TAG, "Syncing ReceiveTable " + entry.getValue() + " from remote table " + entry.getKey());
             HttpFetchr httpFetchr = new HttpFetchr(entry.getKey(), entry.getValue());
             httpFetchr.fetch();
         }
 
-        for (Map.Entry<String, Class<? extends SendReceiveModel>> entry : mSendReceiveTables
-                .entrySet()) {
+        for (Map.Entry<String, Class<? extends SendReceiveModel>> entry : mSendReceiveTables.entrySet()) {
             if (BuildConfig.DEBUG)
-                Log.i(TAG, "Syncing " + entry.getValue() + " from remote table " + entry.getKey());
+                Log.i(TAG, "Syncing SendReceiveTable " + entry.getValue() + " from remote table " + entry.getKey());
             SendReceiveFetchr httpFetchr = new SendReceiveFetchr(entry.getKey(), entry.getValue());
             httpFetchr.fetch();
         }
 
         for (Map.Entry<String, Class<? extends SendModel>> entry : mSendTables.entrySet()) {
             if (BuildConfig.DEBUG)
-                Log.i(TAG, "Syncing " + entry.getValue() + " to remote table " + entry.getKey());
+                Log.i(TAG, "Syncing SendTable " + entry.getValue() + " to remote table " + entry.getKey());
             HttpPushr httpPushr = new HttpPushr(entry.getKey(), entry.getValue());
             httpPushr.push();
         }
 
-        NetworkNotificationUtils.showNotification(context, android.R.drawable
-                .stat_sys_download_done, R.string.sync_notification_complete_text);
+        NetworkNotificationUtils.showNotification(context, android.R.drawable.stat_sys_download_done, R.string.sync_notification_complete_text);
     }
 
     public static void authenticateUser(String email, String password) {

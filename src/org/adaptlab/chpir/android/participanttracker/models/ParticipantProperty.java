@@ -93,6 +93,7 @@ public class ParticipantProperty extends SendReceiveModel {
     @Override
     public void setAsSent() {
         mSent = true;
+        mChanged = false;
         save();
     }
 
